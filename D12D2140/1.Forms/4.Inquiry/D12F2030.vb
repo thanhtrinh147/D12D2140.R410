@@ -265,7 +265,10 @@ Public Class D12F2030
         sSQL &= SQLString(tdbcObjectTypeID.Text) & COMMA 'ObjectTypeID, varchar[20], NOT NULL
         sSQL &= SQLString(tdbcObjectID.Text) & COMMA 'ObjectID, varchar[20], NOT NULL
         sSQL &= SQLNumber(IIf(optPeriod.Checked, 0, 1)) & COMMA 'Time, tinyint, NOT NULL
-        sSQL &= SQLNumber(gbUnicode)
+        sSQL &= SQLNumber(gbUnicode) & COMMA 'CodeTable, tinyint, NOT NULL
+        '23/3/2018, Nguyễn Quốc Khương: id 107118-Lỗi truy vấn lựa chọn nhà cung cấp 
+        sSQL &= SQLString(gsLanguage) & COMMA 'Language, varchar[20], NOT NULL
+        sSQL &= SQLString(gsDivisionID) 'DivisionID, varchar[20], NOT NULL
         Return sSQL
     End Function
 
