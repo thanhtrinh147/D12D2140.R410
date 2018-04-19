@@ -306,6 +306,7 @@ Public Class D12F3100
             tdbg.Splits(1).DisplayColumns(COL_TransTypeName).Visible = False
             tdbg.Splits(1).DisplayColumns(COL_ATVoucherNo).Visible = False
         End If
+        ToolStripSeparator1.Visible = mnsCreateContract.Visible
         '***********************************
         If D12Systems.CreateDirectPO = 1 Then chkIsAuto.Visible = False
         '**********************************
@@ -1083,9 +1084,11 @@ Public Class D12F3100
         Dim dt As DataTable = ReturnDataTable(sSQL)
         Dim dr() As DataRow = dt.Select("KindContract = 'PO'")
         mnsCreateAvailableContract.Visible = dr.Length > 0 And ReturnPermission("D12F3122") >= EnumPermission.View 'ID 76845 20/07/2015 'Nếu tồn tại dòng dữ liệu có KindContract = ‘PO’ thì hiện menu Lập hợp đồng mua hàng, ngược lại nếu không tồn tại dòng nào có KindContract = ‘PO’ thì ẩn menu Lập hợp đồng mua hàng
+
         '***************************
         dr = dt.Select("KindContract = 'PPC'")
         mnsCreateContract.Visible = dr.Length > 0 And ReturnPermission("D12F3123") >= EnumPermission.View 'ID 76845 20/07/2015 'Nếu tồn tại dòng dữ liệu có KindContract = ‘PPC’ thì hiện menu Lập hợp đồng mua hàng (chuyên ngành BĐS), ngược lại nếu không tồn tại dòng nào có KindContract = ‘PPC’ thì ẩn menu Lập hợp đồng mua hàng (chuyên ngành BĐS)
+        ToolStripSeparator1.Visible = mnsCreateContract.Visible
         '***************************
         mnsCreateVoucher.Visible = ReturnPermission("D12F3121") >= EnumPermission.View 'ID 76845 20/07/2015
         '***************************

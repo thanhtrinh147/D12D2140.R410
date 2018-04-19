@@ -13,7 +13,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartAction>Program</StartAction>
-    <StartProgram>C:\LEMON3\RunDLL.exe</StartProgram>
+    <StartProgram>C:\LEMON3_V41\D12E0040_D41.exe</StartProgram>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <StartProgram>C:\LEMON3\D12E0040_D.exe</StartProgram>

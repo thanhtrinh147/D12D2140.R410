@@ -20,23 +20,7 @@ Partial Class D12F3100
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim Style1 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style2 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style3 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style4 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style5 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(D12F3100))
-        Dim Style6 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style7 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style8 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style9 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style10 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style11 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style12 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style13 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style14 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style15 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style16 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.tdbcObjectTypeID = New C1.Win.C1List.C1Combo()
         Me.lblObjectTypeID = New System.Windows.Forms.Label()
@@ -87,13 +71,8 @@ Partial Class D12F3100
         Me.tdbcObjectTypeID.AutoCompletion = True
         Me.tdbcObjectTypeID.AutoDropDown = True
         Me.tdbcObjectTypeID.Caption = ""
-        Me.tdbcObjectTypeID.CaptionHeight = 17
-        Me.tdbcObjectTypeID.CaptionStyle = Style1
         Me.tdbcObjectTypeID.CharacterCasing = System.Windows.Forms.CharacterCasing.Normal
-        Me.tdbcObjectTypeID.ColumnCaptionHeight = 17
-        Me.tdbcObjectTypeID.ColumnFooterHeight = 17
         Me.tdbcObjectTypeID.ColumnWidth = 100
-        Me.tdbcObjectTypeID.ContentHeight = 17
         Me.tdbcObjectTypeID.DeadAreaBackColor = System.Drawing.Color.Empty
         Me.tdbcObjectTypeID.DisplayMember = "ObjectTypeID"
         Me.tdbcObjectTypeID.DropdownPosition = C1.Win.C1List.DropdownPositionEnum.LeftDown
@@ -101,29 +80,19 @@ Partial Class D12F3100
         Me.tdbcObjectTypeID.EditorBackColor = System.Drawing.SystemColors.Window
         Me.tdbcObjectTypeID.EditorFont = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
         Me.tdbcObjectTypeID.EditorForeColor = System.Drawing.SystemColors.WindowText
-        Me.tdbcObjectTypeID.EditorHeight = 17
         Me.tdbcObjectTypeID.EmptyRows = True
-        Me.tdbcObjectTypeID.EvenRowStyle = Style2
         Me.tdbcObjectTypeID.ExtendRightColumn = True
         Me.tdbcObjectTypeID.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        Me.tdbcObjectTypeID.FooterStyle = Style3
-        Me.tdbcObjectTypeID.HeadingStyle = Style4
-        Me.tdbcObjectTypeID.HighLightRowStyle = Style5
         Me.tdbcObjectTypeID.Images.Add(CType(resources.GetObject("tdbcObjectTypeID.Images"), System.Drawing.Image))
-        Me.tdbcObjectTypeID.ItemHeight = 15
         Me.tdbcObjectTypeID.Location = New System.Drawing.Point(140, 17)
         Me.tdbcObjectTypeID.MatchEntryTimeout = CType(2000, Long)
         Me.tdbcObjectTypeID.MaxDropDownItems = CType(8, Short)
         Me.tdbcObjectTypeID.MaxLength = 32767
         Me.tdbcObjectTypeID.MouseCursor = System.Windows.Forms.Cursors.Default
         Me.tdbcObjectTypeID.Name = "tdbcObjectTypeID"
-        Me.tdbcObjectTypeID.OddRowStyle = Style6
-        Me.tdbcObjectTypeID.RowDivider.Color = System.Drawing.Color.DarkGray
         Me.tdbcObjectTypeID.RowDivider.Style = C1.Win.C1List.LineStyleEnum.None
         Me.tdbcObjectTypeID.RowSubDividerColor = System.Drawing.Color.DarkGray
-        Me.tdbcObjectTypeID.SelectedStyle = Style7
-        Me.tdbcObjectTypeID.Size = New System.Drawing.Size(128, 23)
-        Me.tdbcObjectTypeID.Style = Style8
+        Me.tdbcObjectTypeID.Size = New System.Drawing.Size(128, 21)
         Me.tdbcObjectTypeID.TabIndex = 1
         Me.tdbcObjectTypeID.ValueMember = "ObjectTypeID"
         Me.tdbcObjectTypeID.PropBag = resources.GetString("tdbcObjectTypeID.PropBag")
@@ -148,13 +117,8 @@ Partial Class D12F3100
         Me.tdbcObjectID.AutoCompletion = True
         Me.tdbcObjectID.AutoDropDown = True
         Me.tdbcObjectID.Caption = ""
-        Me.tdbcObjectID.CaptionHeight = 17
-        Me.tdbcObjectID.CaptionStyle = Style9
         Me.tdbcObjectID.CharacterCasing = System.Windows.Forms.CharacterCasing.Normal
-        Me.tdbcObjectID.ColumnCaptionHeight = 17
-        Me.tdbcObjectID.ColumnFooterHeight = 17
         Me.tdbcObjectID.ColumnWidth = 100
-        Me.tdbcObjectID.ContentHeight = 17
         Me.tdbcObjectID.DeadAreaBackColor = System.Drawing.Color.Empty
         Me.tdbcObjectID.DisplayMember = "ObjectID"
         Me.tdbcObjectID.DropdownPosition = C1.Win.C1List.DropdownPositionEnum.LeftDown
@@ -162,29 +126,19 @@ Partial Class D12F3100
         Me.tdbcObjectID.EditorBackColor = System.Drawing.SystemColors.Window
         Me.tdbcObjectID.EditorFont = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
         Me.tdbcObjectID.EditorForeColor = System.Drawing.SystemColors.WindowText
-        Me.tdbcObjectID.EditorHeight = 17
         Me.tdbcObjectID.EmptyRows = True
-        Me.tdbcObjectID.EvenRowStyle = Style10
         Me.tdbcObjectID.ExtendRightColumn = True
         Me.tdbcObjectID.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        Me.tdbcObjectID.FooterStyle = Style11
-        Me.tdbcObjectID.HeadingStyle = Style12
-        Me.tdbcObjectID.HighLightRowStyle = Style13
         Me.tdbcObjectID.Images.Add(CType(resources.GetObject("tdbcObjectID.Images"), System.Drawing.Image))
-        Me.tdbcObjectID.ItemHeight = 15
         Me.tdbcObjectID.Location = New System.Drawing.Point(274, 17)
         Me.tdbcObjectID.MatchEntryTimeout = CType(2000, Long)
         Me.tdbcObjectID.MaxDropDownItems = CType(8, Short)
         Me.tdbcObjectID.MaxLength = 32767
         Me.tdbcObjectID.MouseCursor = System.Windows.Forms.Cursors.Default
         Me.tdbcObjectID.Name = "tdbcObjectID"
-        Me.tdbcObjectID.OddRowStyle = Style14
-        Me.tdbcObjectID.RowDivider.Color = System.Drawing.Color.DarkGray
         Me.tdbcObjectID.RowDivider.Style = C1.Win.C1List.LineStyleEnum.None
         Me.tdbcObjectID.RowSubDividerColor = System.Drawing.Color.DarkGray
-        Me.tdbcObjectID.SelectedStyle = Style15
-        Me.tdbcObjectID.Size = New System.Drawing.Size(128, 23)
-        Me.tdbcObjectID.Style = Style16
+        Me.tdbcObjectID.Size = New System.Drawing.Size(128, 21)
         Me.tdbcObjectID.TabIndex = 2
         Me.tdbcObjectID.ValueMember = "ObjectID"
         Me.tdbcObjectID.PropBag = resources.GetString("tdbcObjectID.PropBag")
@@ -195,7 +149,7 @@ Partial Class D12F3100
         Me.txtObjectName.Location = New System.Drawing.Point(408, 17)
         Me.txtObjectName.Name = "txtObjectName"
         Me.txtObjectName.ReadOnly = True
-        Me.txtObjectName.Size = New System.Drawing.Size(590, 22)
+        Me.txtObjectName.Size = New System.Drawing.Size(590, 20)
         Me.txtObjectName.TabIndex = 3
         Me.txtObjectName.TabStop = False
         '
@@ -241,7 +195,6 @@ Partial Class D12F3100
         Me.tdbg.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbg.AllowSort = False
         Me.tdbg.AlternatingRows = True
-        Me.tdbg.CaptionHeight = 17
         Me.tdbg.ColumnFooters = True
         Me.tdbg.ContextMenuStrip = Me.ContextMenuStrip1
         Me.tdbg.EmptyRows = True
@@ -249,7 +202,6 @@ Partial Class D12F3100
         Me.tdbg.FilterBar = True
         Me.tdbg.FlatStyle = C1.Win.C1TrueDBGrid.FlatModeEnum.Standard
         Me.tdbg.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        Me.tdbg.GroupByCaption = "Drag a column header here to group by that column"
         Me.tdbg.Images.Add(CType(resources.GetObject("tdbg.Images"), System.Drawing.Image))
         Me.tdbg.Location = New System.Drawing.Point(6, 85)
         Me.tdbg.MultiSelect = C1.Win.C1TrueDBGrid.MultiSelectEnum.None
@@ -258,7 +210,6 @@ Partial Class D12F3100
         Me.tdbg.PreviewInfo.Size = New System.Drawing.Size(0, 0)
         Me.tdbg.PreviewInfo.ZoomFactor = 75.0R
         Me.tdbg.PrintInfo.PageSettings = CType(resources.GetObject("tdbg.PrintInfo.PageSettings"), System.Drawing.Printing.PageSettings)
-        Me.tdbg.RowHeight = 15
         Me.tdbg.Size = New System.Drawing.Size(1004, 534)
         Me.tdbg.SplitDividerSize = New System.Drawing.Size(1, 1)
         Me.tdbg.TabAcrossSplits = True
@@ -272,7 +223,7 @@ Partial Class D12F3100
         '
         Me.ContextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnsCreateVoucher, Me.mnsCreateAvailableContract, Me.ToolStripSeparator1, Me.mnsCreateContract, Me.ToolStripSeparator2, Me.mnsCreateRequisition, Me.ToolStripSeparator3, Me.mnsCreateContractD06, Me.ToolStripSeparator_Find, Me.mnsFind, Me.mnsListAll})
         Me.ContextMenuStrip1.Name = "ContextMenuStrip"
-        Me.ContextMenuStrip1.Size = New System.Drawing.Size(294, 182)
+        Me.ContextMenuStrip1.Size = New System.Drawing.Size(294, 204)
         '
         'mnsCreateVoucher
         '

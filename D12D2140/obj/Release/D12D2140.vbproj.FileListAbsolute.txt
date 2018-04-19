@@ -58,7 +58,6 @@ e:\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.Resources.
 e:\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.vbproj.GenerateResource.Cache
 e:\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.dll.licenses
 e:\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.dll
-e:\GitLemonCode\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.vbprojResolveAssemblyReference.cache
 e:\GitLemonCode\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.D12F3030.resources
 e:\GitLemonCode\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.D12F3031.resources
 e:\GitLemonCode\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.D12F3032.resources
