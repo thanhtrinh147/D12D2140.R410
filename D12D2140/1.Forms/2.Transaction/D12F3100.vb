@@ -770,8 +770,8 @@ Public Class D12F3100
                         .exeName = "D06E2140"
                         .FormActive = "D06F2520"
                         .FormPermission = "D12F3120"
-                        Dim sField() As String = {"CallFrom", "ModuleID"}
-                        Dim sValue() As Object = {Me.Name, D12}
+                        Dim sField() As String = {"CallFrom", "ModuleID", "IsAllowEditPO"} '19/6/2018, Đào Quỳnh Như:id 108229-[CTHV] Bổ sung cột Tổng tiền và cho phép sửa các cột tiền trên màn hình Lựa chọn nhà cung cấp
+                        Dim sValue() As Object = {Me.Name, D12, D12Systems.IsAllowEditPO}
                         .IDxx(sField) = sValue
                         .OutputName = New String() {"Output01"}
                         .ShowDialog()

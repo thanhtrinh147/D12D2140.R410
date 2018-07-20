@@ -1,8 +1,8 @@
-﻿'#-------------------------------------------------------------------------------------
+'#-------------------------------------------------------------------------------------
 '# Created User: Thiên Huỳnh
 '# Created Date: 18/07/2008 2:25:08 PM
 '# Modify User: Minh Hòa
-'# Modify Date: 10/06/2013
+'# Modify Date: 19/11/2013
 '# Description: Xuất dữ liệu ra Excel
 '# Bổ sung CultureInfo
 '# Sửa lại giá trị ngày khi xuất ra Excel
@@ -10,6 +10,8 @@
 '# Sửa lỗi xuất 2 lần khi chọn vào Chuyển Unicode
 '# Sửa hàm LoadTDBDropDown, load dropdown tdbdFormat tăng từ 5 lên 9 
 '# Bổ sung set màu của Phương viết
+'# Sửa hàm SetCellStyle: 19/11/2013
+'# CheckInvalidExport: tách sheet khi xuất excel 18/07/2014
 '#-------------------------------------------------------------------------------------
 
 Imports C1.C1Excel
@@ -20,18 +22,31 @@ Imports System.Windows.Forms
 
 Public Class D99F2222
 
-#Region "Const of tdbg"
-    Private Const COL_OrderNo As Integer = 0      ' STT
-    Private Const COL_Description As Integer = 1  ' Cột dữ liệu
-    Private Const COL_IsUsed As Integer = 2       ' Chọn
-    Private Const COL_IsUnicode As Integer = 3    ' Chuyển Unicode
-    Private Const COL_NumberFormat As Integer = 4 ' Định dạng
-    Private Const COL_DataType As Integer = 5     ' DataType
-    Private Const COL_FieldName As Integer = 6    ' FieldName
-    Private Const COL_Grouped As Integer = 7      ' Grouped
-    Private Const COL_IsSum As Integer = 8        ' Tính tổng
-    Private Const COL_IsDateTime As Integer = 9   ' IsDateTime
-    Private Const COL_IsExport As Integer = 10    ' dòng đã được chọn vào các lưới Subtotal và Pivot
+    Private _tdbgFr As C1.Win.C1TrueDBGrid.C1TrueDBGrid
+    Public WriteOnly Property tdbgFr As C1.Win.C1TrueDBGrid.C1TrueDBGrid
+        Set(ByVal Value As C1.Win.C1TrueDBGrid.C1TrueDBGrid)
+            _tdbgFr = Value
+        End Set
+    End Property
+
+
+#Region "Const of tdbg - Total of Columns: 15"
+
+    Private Const COL_OrderNo As Integer = 0        ' STT
+    Private Const COL_Description As Integer = 1    ' Cột dữ liệu
+    Private Const COL_IsUsed As Integer = 2         ' Chọn
+    Private Const COL_IsUnicode As Integer = 3      ' Chuyển Unicode
+    Private Const COL_NumberFormat As Integer = 4   ' Định dạng
+    Private Const COL_DataType As Integer = 5       ' DataType
+    Private Const COL_FieldName As Integer = 6      ' FieldName
+    Private Const COL_Grouped As Integer = 7        ' Grouped
+    Private Const COL_IsSum As Integer = 8          ' Tính tổng
+    Private Const COL_IsDateTime As Integer = 9     ' IsDateTime
+    Private Const COL_IsExport As Integer = 10      ' IsExport
+    Private Const COL_FooterText As Integer = 11    ' FooterText
+    Private Const COL_IsMerge As Integer = 12       ' IsMerge
+    Private Const COL_MergeRelative As Integer = 13 ' MergeRelative
+    Private Const COL_Format As Integer = 14        ' Format
 #End Region
 
 #Region "Const of tdbgGroup"
@@ -69,7 +84,6 @@ Public Class D99F2222
     Friend WithEvents C1XLBook1 As New C1.C1Excel.C1XLBook
     Private bUnicode As Boolean = False
     Private bCheckD91T2021 As Boolean
-    Private _FormID As String
     Private _dtExportTable As DataTable
     Private _FormState As EnumFormState
     Private sFormName As String = ""
@@ -80,6 +94,7 @@ Public Class D99F2222
     Private bSum As Boolean = True
 
     Dim dtGrid As New DataTable 'Để đổ nguồn cho Grid ở TH Sửa
+
     Dim dtD91T2023 As New DataTable 'Để đổ nguồn cho Grid ở SubTotals và PivotTable
     Dim dtSubTotals As New DataTable() 'Để đổ nguồn cho lươí dạng SubTotal
     Dim dtPivot As New DataTable() 'Để đổ nguồn cho lươí dạng PivotTable
@@ -89,9 +104,12 @@ Public Class D99F2222
     Dim colDistinct() As String = {"GroupFieldName", "GroupFieldNameDesc", "ExcelFunction"}
     Dim btdbgGroup_RowColChange As Boolean = False
 
-    Dim EXL As Excel.Application
+    Dim EXL As Object 'Excel.Application
     Dim bIsLoadEXL As Boolean = False
-
+    Dim MaxRowExcel As Integer = 1048000 ' Số dòng tối đa của 1 Sheet trong Excel
+    Dim iMaxSheet As Integer = 1
+    '    Private DEFAULT_PATH_OUT As String = Application.StartupPath & "\Temp"
+    Private DEFAULT_PATH_OUT As String = gsApplicationPath & "\Temp"
     ''' <summary>
     ''' _modeVB6 = 1: màn hình VB6; 0 màn hình .NET
     ''' </summary>
@@ -103,9 +121,13 @@ Public Class D99F2222
         End Set
     End Property
 
-    Public WriteOnly Property FormID() As String
-        Set(ByVal value As String)
-            _FormID = value
+    Private _formID As String = ""
+    Public Property FormID() As String
+        Get
+            Return _formID
+        End Get
+        Set(ByVal Value As String)
+            _formID = Value
         End Set
     End Property
 
@@ -136,6 +158,17 @@ Public Class D99F2222
         End Set
     End Property
 
+    Private _dtMaster As DataTable
+    Public WriteOnly Property dtMaster() As DataTable
+        Set(ByVal Value As DataTable)
+            _dtMaster = Value
+            If _dtMaster Is Nothing Then Exit Property
+            _dtMaster.DefaultView.Sort = "TabIndex"
+            LoadDataSource(tdbgM, _dtMaster, gbUnicode)
+            FooterTotalGrid(tdbgM, COLM_Description)
+        End Set
+    End Property
+
 #End Region
 
 #Region "From Load"
@@ -147,6 +180,7 @@ Public Class D99F2222
             thr.Start()
         End If
         InitializeComponent()
+
     End Sub
 
     Private Sub LoadTDBDropDown()
@@ -207,7 +241,7 @@ Public Class D99F2222
         sSQL &= " DisplayColumn, DisplayRow, Path, SheetExcel, ShowColTitle, IsExportType, ExportType, " & vbCrLf
         sSQL &= " SubtotalRow, SubtotalColumn, GrandTotalRow, GrandTotalColumn, " & vbCrLf
         sSQL &= "Title" & UnicodeJoin(_useUnicode) & " as Title, " & vbCrLf
-        sSQL &= "CheckValue, UnCheckValue, PageOrientation, PagePercent, PageSize " & vbCrLf
+        sSQL &= "CheckValue, UnCheckValue, PageOrientation, PagePercent, PageSize, IsAutoSizeColumn,IsMarkTimer,PathOut, IsNoFormula, ShowTotalRow " & vbCrLf
         sSQL &= "From D91T2021 WITH(NOLOCK) " & vbCrLf
         sSQL &= "Where ModuleID = " & SQLString(sFormName.Substring(1, 2)) & " And FormID = " & SQLString(sFormName) & vbCrLf
         'Update 16/08/2010: Nhập Unicode lưu template khác, Vni template khác
@@ -619,6 +653,8 @@ Public Class D99F2222
     End Sub
 
     Private Sub D99F2222_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        'If _dtMaster Is Nothing OrElse _dtMaster.Rows.Count = 0 Then tabDisplay.TabPages.Remove(TabPage2)
+        ResetColorGrid(tdbgM)
         SetBackColorObligatory()
         chkIsExportType.Checked = False
         chkIsExportType_Click(Nothing, Nothing)
@@ -634,18 +670,15 @@ Public Class D99F2222
         'Update 18/10/2010: kiểm tra nhập Mã
         CheckIdTextBox(New TextBox() {txtExcelTemplateID, txtChecked, txtUnChecked})
 
-
         If Not bCheckD91T2021 Then
             _FormState = EnumFormState.FormAdd
             btnDelete.Enabled = False
             tdbcExcelTemplateID.Visible = False
             txtExcelTemplateID.Visible = True
             txtExcelTemplateID.Text = ""
-
+            chkIsMarkTimer.Enabled = False
             'Update 07/07/2010: Thêm mới thì Check, Sửa thì UnCheck
             chkShowAll.Checked = True
-
-
             LoadGrid()
         Else
             _FormState = EnumFormState.FormEdit
@@ -654,13 +687,14 @@ Public Class D99F2222
             txtExcelTemplateID.Visible = False
             tdbcExcelTemplateID.SelectedIndex = 1
         End If
-
-        If _useUnicode Then
-            chkConvertUnicode.Checked = True
-            chkConvertUnicode.Visible = False
-            tdbg.Splits(0).DisplayColumns(COL_Description).Style.Font = FontUnicode()
-        End If
-
+        'If _useUnicode Then
+        '    chkConvertUnicode.Checked = True
+        '    chkConvertUnicode.Visible = False
+        '    tdbg.Splits(0).DisplayColumns(COL_Description).Style.Font = FontUnicode()
+        'ElseIf gbUnicode = True AndAlso _useUnicode = False Then 'Lê Anh Vũ: 12/08/2016: Fix Kh dùng Unicode nhưng 1 số  Form còn dùng  Vni thì mặc định Check Chuyển Unicode.
+        '    chkConvertUnicode.Checked = True
+        '    chkConvertUnicode.Visible = True
+        'End If
         tdbgGroup_LockedColumns()
         tdbgSubTotals_LockedColumns()
         tdbgColumn_LockedColumns()
@@ -674,44 +708,47 @@ Public Class D99F2222
 
     Private Sub Loadlanguage()
         '================================================================ 
-        Me.Text = r("Xuat_Excel") & UnicodeCaption(_useUnicode) 'XuÊt Excel 
+        Me.Text = rL3("Xuat_Excel") & UnicodeCaption(_useUnicode) 'XuÊt Excel 
         '================================================================ 
-        lblColExcel.Text = r("Cot_hien_thi") 'Cột hiển thị
-        lblRowExcel.Text = r("Dong_hien_thi") 'Dòng hiển thị
-        lblPath.Text = r("Duong_dan") 'Đường dẫn
-        lblExcelTemplateID.Text = r("Mau_xuat_Excel")
-        lblColumn.Text = r("Cot") '"Cột"
+        lblColExcel.Text = rL3("Cot_hien_thi") 'Cột hiển thị
+        lblRowExcel.Text = rL3("Dong_hien_thi") 'Dòng hiển thị
+        'lblPathIn.Text = rl3("Duong_dan") 'Đường dẫn
+        lblExcelTemplateID.Text = rL3("Mau_xuat_Excel")
+        lblColumn.Text = rL3("Cot") '"Cột"
         If geLanguage = EnumLanguage.Vietnamese Then
             lblRow.Text = "Dòng"
         Else
             lblRow.Text = "Row"
         End If
-        lblData.Text = r("Du_lieu") '"Dữ liệu"
-        lblMessage.Text = r("Dung_chuot_de_di_chuyen_dong_trong_moi_luoi") '"Dùng chuột để di chuyển dòng trong mỗi lưới"
+        lblData.Text = rL3("Du_lieu") '"Dữ liệu"
+        lblMessage.Text = rL3("Dung_chuot_de_di_chuyen_dong_trong_moi_luoi") '"Dùng chuột để di chuyển dòng trong mỗi lưới"
         '================================================================ 
-        grpShowPivot.Text = r("Hien_thi") '"Hiển thị"
+        grpShowPivot.Text = rL3("Hien_thi") '"Hiển thị"
         '================================================================ 
-        chkDisplayTitle.Text = r("Hien_thi_tieu_de_cot") 'Hiển thị tiêu đề cột
-        chkConvertUnicode.Text = r("Chuyen_Unicode")
-        chkShowAll.Text = r("Hien_thi_tat_ca")
-        chkIsExportType.Text = r("Dang_xuat") '"Dạng xuất"
-        chkSubTotalsRow.Text = r("Tong_cua_tung_nhom_dong") '"Tổng của từng nhóm dòng"
-        chkSubTotalsCol.Text = r("Tong_cua_tung_nhom_cot") '"Tổng của từng nhóm cột"
-        chkGrandRow.Text = r("Tong_cua_tong_dong") '"Tổng của tổng dòng"
-        chkGrandColumn.Text = r("Tong_cua_tong_cot") '"Tổng của tổng cột"
+        chkDisplayTitle.Text = rL3("Hien_thi_tieu_de_cot") 'Hiển thị tiêu đề cột
+        '  chkConvertUnicode.Text = rl3("Chuyen_Unicode")
+        chkShowAll.Text = rL3("Hien_thi_tat_ca")
+        chkIsExportType.Text = rL3("Dang_xuat") '"Dạng xuất"
+        chkSubTotalsRow.Text = rL3("Tong_cua_tung_nhom_dong") '"Tổng của từng nhóm dòng"
+        chkSubTotalsCol.Text = rL3("Tong_cua_tung_nhom_cot") '"Tổng của từng nhóm cột"
+        chkGrandRow.Text = rL3("Tong_cua_tong_dong") '"Tổng của tổng dòng"
+        chkGrandColumn.Text = rL3("Tong_cua_tong_cot") '"Tổng của tổng cột"
+        chkShowSum.Text = rL3("Hien_thi_dong_tong") '"Hiển thị dòng tổng"
+        chkIsAutoSizeColumn.Text = rL3("Tu_dong_gian_cot") '"Tự động giãn cột
+        chkIsNoFormula.Text = "Bỏ qua cột có công thức"
         '================================================================ 
-        btnExport.Text = r("Xuat__Excel") 'Xuất &Excel
-        btnClose.Text = r("Do_ng") 'Đó&ng
-        btnSave.Text = r("_Luu") '&Lưu
-        btnDelete.Text = r("_Xoa") '&Xóa
+        btnExport.Text = rL3("Xuat__Excel") 'Xuất &Excel
+        btnClose.Text = rL3("Do_ng") 'Đó&ng
+        btnSave.Text = rL3("_Luu") '&Lưu
+        btnDelete.Text = rL3("_Xoa") '&Xóa
         '================================================================ 
-        'tdbg.Columns("OrderNo").Caption = r("STT")
-        tdbg.Columns("Description").Caption = r("Cot_du_lieu") 'Cột dữ liệu
-        tdbg.Columns("IsUsed").Caption = r("Chon") 'Chọn
-        'tdbg.Columns("IsUnicode").Caption = r("Chuyen_Unicode") 'Chọn
-        tdbg.Columns("NumberFormat").Caption = r("Dinh_dang") 'Chọn
+        'tdbg.Columns("OrderNo").Caption = rl3("STT")
+        tdbg.Columns("Description").Caption = rL3("Cot_du_lieu") 'Cột dữ liệu
+        tdbg.Columns("IsUsed").Caption = rL3("Chon") 'Chọn
+        'tdbg.Columns("IsUnicode").Caption = rl3("Chuyen_Unicode") 'Chọn
+        tdbg.Columns("NumberFormat").Caption = rL3("Dinh_dang") 'Chọn
         '================================================================ 
-        tdbgGroup.Columns("GroupFieldNameDesc").Caption = r("Cot_du_lieu") 'Cột dữ liệu
+        tdbgGroup.Columns("GroupFieldNameDesc").Caption = rL3("Cot_du_lieu") 'Cột dữ liệu
 
         Dim sFunction As String
         If geLanguage = EnumLanguage.Vietnamese Then
@@ -722,39 +759,57 @@ Public Class D99F2222
 
         tdbgGroup.Columns("ExcelFunction").Caption = sFunction
         '================================================================ 
-        tdbgSubTotals.Columns("FieldNameDesc").Caption = r("Cot_hien_thi_Subtotals") '"Cột hiển thị Subtotals"
+        tdbgSubTotals.Columns("FieldNameDesc").Caption = rL3("Cot_hien_thi_Subtotals") '"Cột hiển thị Subtotals"
         '================================================================ 
-        tdbgColumn.Columns("FieldNameDesc").Caption = r("Cot_du_lieu") 'Cột dữ liệu
+        tdbgColumn.Columns("FieldNameDesc").Caption = rL3("Cot_du_lieu") 'Cột dữ liệu
         '================================================================ 
-        tdbgRow.Columns("FieldNameDesc").Caption = r("Cot_du_lieu") 'Cột dữ liệu
+        tdbgRow.Columns("FieldNameDesc").Caption = rL3("Cot_du_lieu") 'Cột dữ liệu
         '================================================================ 
-        tdbgData.Columns("FieldNameDesc").Caption = r("Cot_du_lieu") 'Cột dữ liệu
+        tdbgData.Columns("FieldNameDesc").Caption = rL3("Cot_du_lieu") 'Cột dữ liệu
         tdbgData.Columns("ExcelFunction").Caption = sFunction '"Hàm"
 
-        lblTitle.Text = r("Tieu_de")
-        TabInfo.Text = "1. " & r("Thong_tin_chung")
-        TabAdvance.Text = "2. " & r("Nang_cao")
+        lblTitle.Text = rL3("Tieu_de")
+        TabInfo.Text = "1. " & rL3("Thong_tin_chung")
+        TabAdvance.Text = "2. " & rL3("Nang_cao")
         If geLanguage = EnumLanguage.Vietnamese Then
-            lblSetupCheck.Text = "Thiết lập dữ liệu xuất cho giá trị của cột tùy chọn"
-            lblApperance.Text = "Thiết lập trang in"
+            'lblSetupCheck.Text = "Thiết lập dữ liệu xuất cho giá trị của cột tùy chọn"
+            'lblApperance.Text = "Thiết lập trang in"
             optPortrait.Text = "Thẳng đứng"
             optLandscape.Text = "Nằm ngang"
             lblAdjust.Text = "Kích cỡ"
             lblSizePecent.Text = "% kích cỡ chuẩn"
             lblPageSize.Text = "Khổ giấy"
+            lblPathIn.Text = "File mẫu"
+            lblPathOut.Text = "Đường dẫn xuất"
+            grpSetup.Text = "Thiết lập"
+            lblSetupCheck.Text = "Dữ liệu xuất cho giá trị của cột tùy chọn"
+            lblApperance.Text = "Trang in"
+            chkIsMarkTimer.Text = "Gắn nhãn thời gian cho file"
         Else
-            lblSetupCheck.Text = "Setup value for Checkbox data column"
-            lblApperance.Text = "Page setup"
+            'lblSetupCheck.Text = "Setup value for Checkbox data column"
+            'lblApperance.Text = "Page setup"
             optPortrait.Text = "Portrait"
-            optLandscape.Text = "LandSpace"
+            optLandscape.Text = "Landscape"
             lblAdjust.Text = "Scaling"
             'grpAdjust.Width = 533
             'grpAdjust.Left = txtChecked.Left
             lblSizePecent.Text = "% normal size"
             lblPageSize.Text = "Paper size"
+            lblPathIn.Text = "Template file"
+            lblPathOut.Text = "Output file path"
+            grpSetup.Text = "Setup"
+            lblSetupCheck.Text = "The output value of the column for options"
+            lblApperance.Text = "Pager Options"
+            chkIsMarkTimer.Text = "Labeling time to file"
         End If
-    End Sub
 
+        btnNotSave.Text = rL3("Khong_lu_u")
+        TabPage1.Text = "1. " & rL3("Cot_du_lieu")
+        TabPage2.Text = "2. " & rL3("Danh_sach_tham_so")
+
+        tdbgM.Columns(COLM_Description).Caption = rL3("Noi_dung")
+        tdbgM.Columns(COLM_FieldExcel).Caption = rL3("Tham_so")
+    End Sub
     Private Sub SetBackColorObligatory()
         tdbcExcelTemplateID.EditorBackColor = COLOR_BACKCOLOROBLIGATORY
         txtExcelTemplateID.BackColor = COLOR_BACKCOLOROBLIGATORY
@@ -763,16 +818,21 @@ Public Class D99F2222
     End Sub
 
     Private Sub LoadMaster(ByVal dt As DataTable)
-        If dt.Rows.Count = 0 Then Exit Sub
+        If dt.Rows.Count = 0 Then
+            txtPathOut.Text = DEFAULT_PATH_OUT
+            lblSampleFileName.Text = txtPathOut.Text & "\Data.xlsx"
+            Exit Sub
+        End If
+
 
         Dim sPath As String = ""
-        Dim sSheet As String = ""
+        '   Dim sSheet As String = ""
         Dim dr As DataRow
         dr = dt.Rows(0)
 
         sPath = dr("Path").ToString
-        sSheet = dr("SheetExcel").ToString
-        chkConvertUnicode.Checked = L3Bool(dr("IsUnicode").ToString)
+        '  sSheet = dr("SheetExcel").ToString
+        'chkConvertUnicode.Checked = L3Bool(dr("IsUnicode").ToString)
         chkDisplayTitle.Checked = L3Bool(dr("ShowColTitle").ToString)
         tdbcColExcel.Text = IIf(dr("DisplayColumn").ToString = "", "A", dr("DisplayColumn").ToString).ToString
         txtRow.Text = IIf(dr("DisplayRow").ToString = "", "1", dr("DisplayRow").ToString).ToString
@@ -792,17 +852,41 @@ Public Class D99F2222
         optLandscape.Checked = L3Bool(dr("PageOrientation").ToString)
         dudAdjust.Text = dr("PagePercent").ToString
         cboPageSize.Text = dr("PageSize").ToString
+        chkIsAutoSizeColumn.Checked = L3Bool(dr("IsAutoSizeColumn").ToString)
+        chkIsNoFormula.Checked = L3Bool(dr("IsNoFormula"))
 
+        chkShowSum.Checked = L3Bool(dr("ShowTotalRow")) 'không thấy lưu
         If sPath = "" Then
-            txtPath.Text = ""
+            txtPathIn.Text = ""
             cboDefaultSheet.Items.Clear()
             cboDefaultSheet.Text = ""
             cboDefaultSheet.Enabled = False
+
+            chkIsMarkTimer.Enabled = False
+            lblSampleFileName.Visible = False
+
+            txtPathOut.Text = DEFAULT_PATH_OUT
+            lblSampleFileName.Text = txtPathOut.Text & "\Data.xlsx"
         Else
-            txtPath.Text = sPath
-            GetNameSheets()
-            cboDefaultSheet.Text = sSheet
+            txtPathIn.Text = sPath
+
+            txtPathOut.Text = L3String(dr("PathOut"))
+            If txtPathOut.Text.Trim = "" Then
+                txtPathOut.Text = DEFAULT_PATH_OUT
+            Else
+                If txtPathOut.Text.Trim.ToLower.EndsWith(".xls") Then txtPathOut.Text = txtPathOut.Text.Replace(".xls", ".xlsx")
+            End If
+            '  cboDefaultSheet.Text = sSheet
             cboDefaultSheet.Enabled = True
+
+            chkIsMarkTimer.Enabled = True
+            chkIsMarkTimer.Checked = L3Bool(dr("IsMarkTimer"))
+            lblSampleFileName.Visible = True
+
+            chkFileTimer_Click(Nothing, Nothing)
+            GetNameSheets()
+            cboDefaultSheet.Text = dr("SheetExcel")
+            txtPathIn.Tag = txtPathIn.Text
         End If
     End Sub
 
@@ -834,7 +918,7 @@ Public Class D99F2222
     Private Sub ResetDataMaster()
         'Create by Minh Hòa 01/09/2010: set lại các giá trị cho dữ liệu các control của master
         txtTitle.Text = ""
-        txtPath.Text = ""
+        txtPathIn.Text = ""
         cboDefaultSheet.Items.Clear()
         tdbcColExcel.Text = "A"
         txtRow.Text = "1"
@@ -849,6 +933,13 @@ Public Class D99F2222
         optSubTotals.Checked = True
         'Update 21/12/2010
         optPivotTable.Checked = False
+
+        chkShowSum.Checked = True
+        chkIsAutoSizeColumn.Checked = True
+        chkIsNoFormula.Checked = False
+        txtPathOut.Text = DEFAULT_PATH_OUT
+        lblSampleFileName.Text = txtPathOut.Text + "\Data.xlsx"
+        chkIsMarkTimer.Checked = False
     End Sub
 #End Region
 
@@ -871,7 +962,7 @@ Public Class D99F2222
             tdbg.DataSource = Nothing
             Exit Sub
         End If
-        If tdbcExcelTemplateID.Text = "+" Then
+        If tdbcExcelTemplateID.SelectedIndex = 0 AndAlso tdbcExcelTemplateID.Text = "+" Then 'TH thêm mới
             _FormState = EnumFormState.FormAdd
             'Update 07/07/2010: Thêm mới thì Check, Sửa thì UnCheck
             chkShowAll.Checked = True
@@ -884,6 +975,7 @@ Public Class D99F2222
             btnSave.Enabled = True
             tdbcExcelTemplateID.Visible = False
             txtExcelTemplateID.Focus()
+
         Else
             'Update 07/07/2010: Thêm mới thì Check, Sửa thì UnCheck
             chkShowAll.Checked = False
@@ -988,6 +1080,7 @@ Public Class D99F2222
     End Sub
 
     Private Sub tdbg_RowColChange(ByVal sender As Object, ByVal e As C1.Win.C1TrueDBGrid.RowColChangeEventArgs) Handles tdbg.RowColChange
+        If e IsNot Nothing AndAlso e.LastRow = -1 Then Exit Sub
         If tdbg.Col = COL_NumberFormat Then
             If tdbg(tdbg.Row, COL_DataType).ToString.Trim <> "N" Then
                 tdbg.Columns(COL_NumberFormat).DropDown = Nothing
@@ -1107,6 +1200,7 @@ Public Class D99F2222
     End Sub
 
     Private Sub tdbgGroup_RowColChange(ByVal sender As Object, ByVal e As C1.Win.C1TrueDBGrid.RowColChangeEventArgs) Handles tdbgGroup.RowColChange
+        If e IsNot Nothing AndAlso e.LastRow = -1 Then Exit Sub
         If btdbgGroup_RowColChange Then
             'Huỳnh Edit 27/05/2010: Bổ sung thêm điều kiện Filter Fieldname <> '' khi Có Group mà ko có Sum
             LoadDataSource(tdbgSubTotals, ReturnTableFilter(dtSubTotals, "GroupFieldName = " & SQLString(tdbgGroup.Columns(COL1_GroupFieldName).Text) & " And FieldName <> ''", True), _useUnicode)
@@ -1469,6 +1563,26 @@ Public Class D99F2222
         Me.Close()
     End Sub
 
+    Private Function CheckPath() As Boolean
+        If txtPathIn.Text <> "" Then
+            If Not CheckPathIn() Then Return False
+            If txtPathOut.Text.Trim = "" Then
+                D99C0008.MsgNotYetEnter(lblPathOut.Text)
+                tabMain.SelectedTab = TabInfo
+                txtPathOut.Focus()
+                Return False
+            End If
+            Dim sPathIn As String = txtPathIn.Text.Trim().Substring(0, txtPathIn.Text.Trim().LastIndexOf("\"c))
+            If sPathIn = txtPathOut.Text.Trim() Then
+                D99C0008.MsgL3(lblPathOut.Text & " " & rL3("phai_khac_voi") & " " & lblPathIn.Text)
+                tabMain.SelectedTab = TabInfo
+                txtPathOut.Focus()
+                Return False
+            End If
+        End If
+        Return True
+    End Function
+
     Private Function AllowExport() As Boolean
         If tdbg.RowCount <= 0 Then
             D99C0008.MsgNoDataInGrid()
@@ -1483,51 +1597,97 @@ Public Class D99F2222
                 End If
             Next
             If bSelect = False Then
-                D99C0008.MsgL3(r("MSG000010"))
+                D99C0008.MsgL3(rL3("MSG000010"))
                 Return False
             End If
         End If
         If tdbcColExcel.Text.Trim = "" Then
-            D99C0008.MsgNotYetChoose(r("Cot_hien_thi"))
+            D99C0008.MsgNotYetChoose(rL3("Cot_hien_thi"))
             tabMain.SelectedTab = TabInfo
             tdbcColExcel.Focus()
             Return False
         End If
         If txtRow.Text.Trim = "" Then
-            D99C0008.MsgNotYetEnter(r("Dong_hien_thi"))
+            D99C0008.MsgNotYetEnter(rL3("Dong_hien_thi"))
             tabMain.SelectedTab = TabInfo
             txtRow.Focus()
             Return False
         End If
         If Number(tdbcColExcel.SelectedValue) > MaxTinyInt Then '255
-            D99C0008.MsgL3(r("Nhap_so_qua_lon"))
+            D99C0008.MsgL3(rL3("Nhap_so_qua_lon"))
             tabMain.SelectedTab = TabInfo
             tdbcColExcel.Focus()
             Return False
         End If
         If Number(txtRow.Text.Trim) <= 0 Then
-            D99C0008.MsgL3(r("Dong_hien_thi_phai__0"))
+            D99C0008.MsgL3(rL3("Dong_hien_thi_phai__0"))
             tabMain.SelectedTab = TabInfo
             txtRow.Focus()
             Return False
         End If
         If Number(txtRow.Text.Trim) > Int16.MaxValue * 2 Then '65535
-            D99C0008.MsgL3(r("Nhap_so_qua_lon"))
+            D99C0008.MsgL3(rL3("Nhap_so_qua_lon"))
             tabMain.SelectedTab = TabInfo
             txtRow.Focus()
             Return False
         End If
-        If txtPath.Text <> "" AndAlso cboDefaultSheet.Text.Trim = "" Then
-            D99C0008.MsgNotYetChoose("Sheet")
-            tabMain.SelectedTab = TabInfo
-            cboDefaultSheet.Focus()
-            Return False
+        If Not CheckPath() Then Return False
+        If txtPathIn.Text <> "" AndAlso cboDefaultSheet.Text.Trim = "" Then
+            If Not GetNameSheets() Then Return False
+
+            If cboDefaultSheet.Text.Trim = "" Then
+                D99C0008.MsgNotYetChoose("Sheet")
+                tabMain.SelectedTab = TabInfo
+                cboDefaultSheet.Focus()
+                Return False
+            End If
         End If
+        If Not CheckPathOut() Then Return False
         If txtChecked.Text.Trim = txtUnChecked.Text.Trim Then
             D99C0008.MsgL3(IIf(gsLanguage = "84", "Thiết lập dữ liệu xuất cho giá trị của cột tùy chọn không hợp lệ.", "Setup value for Checkbox data column is not valid").ToString)
             tabMain.SelectedTab = TabAdvance
             txtChecked.Focus()
             Return False
+        End If
+
+        If chkIsExportType.Checked Then
+            If optPivotTable.Checked = True Then 'Dạng PivotTable
+                If Not AllowExportPivotTable() Then
+                    Me.Cursor = Cursors.Default
+                    btnExport.Enabled = True
+                    Return False
+                End If
+                '************************************
+            Else
+                If Not AllowExportSubTotals() Then
+                    Me.Cursor = Cursors.Default
+                    btnExport.Enabled = True
+                    Return False
+                End If
+            End If
+        End If
+        Return True
+    End Function
+    Private Function CheckPathOut() As Boolean
+        If txtPathOut.Text.Trim() <> "" Then
+            If Not System.IO.Directory.Exists(txtPathOut.Text.Trim()) Then
+                D99C0008.MsgL3(lblPathOut.Text & " " & rL3("MSG000042"))
+                tabMain.SelectedTab = TabInfo
+                txtPathOut.Focus()
+                Return False
+            End If
+        End If
+        Return True
+    End Function
+
+    Private Function CheckPathIn() As Boolean
+        If txtPathIn.Text <> "" Then
+            If Not System.IO.File.Exists(txtPathIn.Text.Trim) Then
+                D99C0008.MsgL3(lblPathIn.Text & " " & rL3("MSG000042"))
+                tabMain.SelectedTab = TabInfo
+                txtPathIn.Focus()
+                Return False
+            End If
         End If
         Return True
     End Function
@@ -1537,6 +1697,7 @@ Public Class D99F2222
         tdbgSubTotals.UpdateData()
         If tdbgGroup.RowCount <= 0 Then
             D99C0008.MsgNoDataInGrid()
+            tabMain.SelectedTab = TabAdvance
             tdbgGroup.Col = COL1_GroupFieldNameDesc
             tdbgGroup.Focus()
             Return False
@@ -1548,6 +1709,7 @@ Public Class D99F2222
             If dr.Length < 1 Then
                 tdbgGroup.Row = j
                 D99C0008.MsgNoDataInGrid()
+                tabMain.SelectedTab = TabAdvance
                 tdbgSubTotals.Focus()
                 Return False
             End If
@@ -1561,22 +1723,24 @@ Public Class D99F2222
         tdbgData.UpdateData()
         If tdbgColumn.RowCount <= 0 And tdbgRow.RowCount <= 0 Then
             D99C0008.MsgNoDataInGrid()
+            tabMain.SelectedTab = TabAdvance
             tdbgColumn.Focus()
             Return False
         End If
 
         If tdbgData.RowCount <= 0 Then
             D99C0008.MsgNoDataInGrid()
+            tabMain.SelectedTab = TabAdvance
             tdbgData.Focus()
             Return False
         End If
         Return True
     End Function
 
-    Private Function CheckExport(ByRef book As C1XLBook, ByRef sheet As XLSheet) As Boolean
+    Private Function CheckExport(ByRef book As C1XLBook, ByRef sheet As XLSheet, ByVal sFileName As String) As Boolean
         Dim sheetPivot As XLSheet
 
-        If txtPath.Text.Trim = "" Then
+        If txtPathIn.Text.Trim = "" Then
             sheet = book.Sheets(0)
             sheet.Name = "Data"
             iSheetData = 1
@@ -1588,11 +1752,13 @@ Public Class D99F2222
             End If
         Else
             Try
-                book.Load(txtPath.Text)
+
+ReloadFile:
+                book.Load(sFileName)
                 If chkIsExportType.Checked = False Then
                     sheet = book.Sheets(cboDefaultSheet.Text)
                 Else
-                    If D99C0008.MsgAsk(r("Du_lieu_trong_file_nay_se_bi_xoa_khi_xuat") & vbCrLf & r("MSG000021")) = Windows.Forms.DialogResult.No Then
+                    If D99C0008.MsgAsk(rL3("Du_lieu_trong_file_nay_se_bi_xoa_khi_xuat") & vbCrLf & rL3("MSG000021")) = Windows.Forms.DialogResult.No Then
                         Me.Cursor = Cursors.Default
                         btnExport.Enabled = True
                         Return False
@@ -1614,10 +1780,12 @@ Public Class D99F2222
                     End If
                 End If
             Catch ex As Exception
+                If CloseProcessWindow(sFileName) Then GoTo ReloadFile
+
                 Me.Cursor = Cursors.Default
                 btnExport.Enabled = True
-                D99C0008.MsgL3(r("Loi_khi_mo_file_hoac_file_khong_ton_tai"))
-                txtPath.Focus()
+                D99C0008.MsgL3(rL3("Loi_khi_mo_file_hoac_file_khong_ton_tai"))
+                txtPathIn.Focus()
                 Return False
             End Try
         End If
@@ -1641,11 +1809,7 @@ Public Class D99F2222
         End If
     End Sub
 
-    Private Sub CallExport(ByRef book As C1XLBook, ByRef sheet As XLSheet, ByVal iUsedCol As Integer)
-        Dim sFormat As String = ""
-        Dim cell As XLCell
-        Dim iRow, iCol As Integer
-        Dim style As New C1.C1Excel.XLStyle(book)
+    Private Function CheckInvalidExport(ByVal iUsedCol As Integer, ByRef iRow As Integer, ByRef iCol As Integer) As Boolean
 
         iRow = Convert.ToInt32(IIf(txtRow.Text = "", "1", txtRow.Text))
         iCol = Convert.ToInt32(IIf(tdbcColExcel.SelectedValue.ToString = "", "1", tdbcColExcel.SelectedValue.ToString))
@@ -1658,307 +1822,739 @@ Public Class D99F2222
         If txtTitle.Text.Trim <> "" Then
             iRow += 3
         End If
-        ProcessOptions(book, sheet)
         '-------------------------------------------
+
+        '        'Thử tách sheet nhỏ hơn Sheet quy định
+        '        Dim iMaxRow1 As Integer = iRow + dtExportTmp.DefaultView.ToTable.Rows.Count
+        '        iMaxSheet = CInt(Math.Round(iMaxRow1 / MaxRowExcel))
+
         ' Update 20/11/2012 id 52604 - 
-        'If iRow + dtExportTmp.Rows.Count - 1 > Int16.MaxValue * 2 Or iRow + dtExportTmp.Rows.Count < 1 Then
-        If iRow + dtExportTmp.DefaultView.ToTable.Rows.Count - 1 > Int16.MaxValue * 2 Or iRow + dtExportTmp.DefaultView.ToTable.Rows.Count < 1 Then
-            D99C0008.MsgL3(r("So_dong_vuot_qua_gioi_han_cho_phep_cua_Excel"))
-            Me.Cursor = Cursors.Default
-            btnExport.Enabled = True
-            tdbcColExcel.Focus()
-            Exit Sub
+        Dim iRowData As Integer = dtExportTmp.DefaultView.ToTable.Rows.Count
+        'If iRow + iRowData - 1 > Int16.MaxValue * 2 Or iRow + iRowData < 1 Then
+        If iRow + iRowData - 1 > MaxRowExcel Then
+            'Update 18/07/2014: incident 67372  nếu số dòng vượt quá 1 Sheet thì tách thành nhiều sheet khác
+            Dim iMaxRow As Integer = iRow + iRowData
+            'iMaxSheet = CInt(Math.Round(iMaxRow / MaxRowExcel))
+            iMaxSheet = CInt(Math.Ceiling(iMaxRow / MaxRowExcel))
+            Return False
+
         ElseIf iCol + iUsedCol > 255 Or iCol + iUsedCol < 1 Then
-            D99C0008.MsgL3(r("So_cot_vuot_qua_gioi_han_cho_phep_cua_Excel"))
+            D99C0008.MsgL3(rL3("So_cot_vuot_qua_gioi_han_cho_phep_cua_Excel"))
             Me.Cursor = Cursors.Default
             btnExport.Enabled = True
             tdbcColExcel.Focus()
-            Exit Sub
+            Return True
+        End If
+        Return False
+    End Function
+
+
+
+    'Xóa dòng trong Sheet đã có dữ liệu
+    Private Sub DeletetRowSheet(ByRef sheet As XLSheet, ByVal iRowFrom As Integer, ByVal iRowTo As Integer)
+        'Không được Delete dòng. File mẫu khách hàng không được có dữ liệu ID 80829 11/11/2015 Theo thống nhất với GSAM
+        'Try
+        '    '            For i As Integer = iRowFrom To iRowTo
+        '    '                sheet.Rows.RemoveAt(i)
+        '    '            Next
+        '    Dim iCount As Integer = sheet.Rows.Count
+        '    'MessageBox.Show("iRowFrom = " & iRowFrom & " -  sheet.Rows.Count =  " & iCount)
+        '    For i As Integer = iCount - 1 To iRowFrom Step -1
+        '        'MessageBox.Show("iRow = " & i)
+        '        sheet.Rows.RemoveAt(i)
+        '    Next
+
+        'Catch ex As Exception
+
+        'End Try
+    End Sub
+
+    Private Function SetTitleStyleXLS(ByRef style As C1.C1Excel.XLStyle) As C1.C1Excel.XLStyle
+        style.Font = New System.Drawing.Font("Arial", 10.0!, FontStyle.Bold)
+        style.BackColor = Color.LightGray
+        style.BorderBottom = XLLineStyleEnum.Thin
+        style.BorderLeft = XLLineStyleEnum.Thin
+        style.BorderTop = XLLineStyleEnum.Thin
+        style.BorderRight = XLLineStyleEnum.Thin
+        style.AlignHorz = XLAlignHorzEnum.Center 'Canh giữa tiêu đề
+        style.AlignVert = XLAlignVertEnum.Center
+        Return style
+    End Function
+
+    Private Function SetFooterStyleXLS(ByVal sheet As XLSheet, ByVal xstSum As C1.C1Excel.XLStyle) As C1.C1Excel.XLStyle
+        xstSum = New XLStyle(sheet.Book)
+        xstSum.BorderBottom = XLLineStyleEnum.Thin
+        xstSum.BorderLeft = XLLineStyleEnum.Thin
+        xstSum.BorderTop = XLLineStyleEnum.Thin
+        xstSum.BorderRight = XLLineStyleEnum.Thin
+        xstSum.BackColor = Color.LightGray
+        xstSum.Font = New System.Drawing.Font("Arial", 10.0!, FontStyle.Bold)
+        Return xstSum
+    End Function
+
+    Private Sub SetFooterCellXLS(ByRef sheet As XLSheet, ByRef bIsSum As Boolean, ByVal sType As String, ByVal j As Integer, ByVal rowXLS As Integer, ByVal colXLS As Integer, ByVal sFormat As String)
+        ' Dim dSum As Object
+        ' Dim bIsSum As Boolean = False
+        If chkShowSum.Checked = False Then Exit Sub
+        Dim cellTotal As C1.C1Excel.XLCell
+        Dim xstSum As XLStyle
+        While dicFormula.ContainsKey(colXLS)
+            cellTotal = sheet(rowXLS, colXLS)
+            xstSum = SetFooterStyleXLS(sheet, xstSum)
+            cellTotal.Style = xstSum
+            colXLS += 1
+        End While
+
+        Dim dSum As Object = tdbg(j, COL_FooterText)
+        cellTotal = sheet(rowXLS, colXLS)
+        xstSum = SetFooterStyleXLS(sheet, xstSum)
+        If dSum IsNot Nothing AndAlso L3String(dSum) <> "" Then
+            xstSum.AlignHorz = XLAlignHorzEnum.Right
+            xstSum.Format = sFormat
+            If L3Bool(tdbg(j, COL_IsSum)) AndAlso IsNumeric(dSum) Then
+                Try
+                    cellTotal.Value = Number(dSum) 'Tổng cộng thì chuyển qua dạng Number
+                Catch ex As Exception
+                    cellTotal.Value = dSum 'Fix lỗi ngày 21/02/2017: gắn tổng số dòng lên cột số, tại mh D27F3120 cột Diện tích
+                End Try
+
+            Else
+                If sType.Contains("%") Then
+                    Dim sVTmp As String = L3String(dSum)
+                    sVTmp = sVTmp.Replace("%", "")
+                    cellTotal.Value = Number(sVTmp) / 100 'các cột phần trăm,...
+                Else
+                    cellTotal.Value = dSum 'Tổng công (4)
+                End If
+
+            End If
+            If Not bIsSum Then bIsSum = True
+        End If
+        cellTotal.Style = xstSum
+    End Sub
+
+    Private Function SetCellStyleXLS(ByVal book As C1XLBook, ByVal sType As String, ByVal sValue As Object, ByRef sFormat As String, ByVal j As Integer) As C1.C1Excel.XLStyle
+        Dim xst As XLStyle = New XLStyle(book)
+        If sType = "Percent" Then 'Định dạng Percent - Update 06/11/2012
+            xst.BorderBottom = XLLineStyleEnum.Thin
+            xst.BorderLeft = XLLineStyleEnum.Thin
+            xst.BorderTop = XLLineStyleEnum.Thin
+            xst.BorderRight = XLLineStyleEnum.Thin
+            xst.AlignHorz = XLAlignHorzEnum.Right
+            'sFormat = sType '"#,##0" & InsertZero(L3Int(tdbg(j, COL_NumberFormat)))
+            xst.Format = "0.00%"
+        ElseIf sType.Contains("%") Then 'Định dạng CustomPercent - Update 13/01/2015
+            xst.BorderBottom = XLLineStyleEnum.Thin
+            xst.BorderLeft = XLLineStyleEnum.Thin
+            xst.BorderTop = XLLineStyleEnum.Thin
+            xst.BorderRight = XLLineStyleEnum.Thin
+            xst.AlignHorz = XLAlignHorzEnum.Right
+            xst.Format = sType '"0.000%"
+            sFormat = sType
+        ElseIf sType = "D" Then ' Date(D)
+            xst.BorderBottom = XLLineStyleEnum.Thin
+            xst.BorderLeft = XLLineStyleEnum.Thin
+            xst.BorderTop = XLLineStyleEnum.Thin
+            xst.BorderRight = XLLineStyleEnum.Thin
+            xst.AlignHorz = XLAlignHorzEnum.Center
+
+            If L3Int(tdbg(j, COL_IsDateTime)) = 1 Then
+                xst.Format = "dd/MM/yyyy hh:mm:ss"
+            ElseIf L3Int(tdbg(j, COL_IsDateTime)) = 2 Then 'Bổ sung dạng format cho cột Giờ
+                xst.Format = L3String(tdbg(j, COL_Format))
+            Else
+                xst.Format = "dd/mm/yyyy"
+            End If
+
+        ElseIf sType = "N1" Then ' Boolean, Byte là cột checkbox
+            xst.BorderBottom = XLLineStyleEnum.Thin
+            xst.BorderLeft = XLLineStyleEnum.Thin
+            xst.BorderTop = XLLineStyleEnum.Thin
+            xst.BorderRight = XLLineStyleEnum.Thin
+            'Trường hợp này dưới Database có kiểu dữ liệu Bit(0,1) -> DataTable có kiểu dữ liệu String(True,False)
+            xst.AlignHorz = XLAlignHorzEnum.Center
+
+            'Bỏ: chuyển về định dạn theo thiết lập ở dưới
+            ''Update 07/07/2010: Giá trị = True thì format màu đỏ và canh giữa
+            If sValue.ToString.ToUpper = "TRUE" Or sValue.ToString.ToUpper = "FALSE" Then
+                'xst.AlignHorz = XLAlignHorzEnum.Center
+                If sValue.ToString.ToUpper = "TRUE" Then xst.ForeColor = Color.Red
+            Else
+                'xst.AlignHorz = XLAlignHorzEnum.Right
+                If sValue.ToString = "1" Then xst.ForeColor = Color.Red
+            End If
+
+        ElseIf sType = "N2" Then 'dạng số nguyên, không thập phân
+            xst.BorderBottom = XLLineStyleEnum.Thin
+            xst.BorderLeft = XLLineStyleEnum.Thin
+            xst.BorderTop = XLLineStyleEnum.Thin
+            xst.BorderRight = XLLineStyleEnum.Thin
+            xst.AlignHorz = XLAlignHorzEnum.Right
+            sFormat = "#,##0"
+            xst.Format = sFormat '"#,##0"
+        ElseIf sType = "N" Then ' Number(N)
+            xst.BorderBottom = XLLineStyleEnum.Thin
+            xst.BorderLeft = XLLineStyleEnum.Thin
+            xst.BorderTop = XLLineStyleEnum.Thin
+            xst.BorderRight = XLLineStyleEnum.Thin
+            xst.AlignHorz = XLAlignHorzEnum.Right
+            sFormat = "#,##0" & InsertZero(L3Int(tdbg(j, COL_NumberFormat)))
+            xst.Format = sFormat '"#,##0" & InsertZero(L3Int(tdbg(j, COL_NumberFormat)))
+        Else 'String(S)
+            xst.BorderBottom = XLLineStyleEnum.Thin
+            xst.BorderLeft = XLLineStyleEnum.Thin
+            xst.BorderTop = XLLineStyleEnum.Thin
+            xst.BorderRight = XLLineStyleEnum.Thin
+            xst.AlignHorz = XLAlignHorzEnum.Left
+            xst.WordWrap = True
+        End If
+        Return xst
+    End Function
+
+    Private Sub SetCellValueXLS(ByRef cell As XLCell, ByVal sType As String, ByVal sValue As Object, ByVal j As Integer)
+        If sType = "N1" Then ' Boolean, Byte
+            cell.Value = sValue
+            'Update: 09/09/2010: Set lại giá trị theo Thiết lập
+            If sValue.ToString.ToUpper = "TRUE" Or sValue.ToString.ToUpper = "FALSE" Then
+                'xst.AlignHorz = XLAlignHorzEnum.Center
+                If sValue.ToString.ToUpper = "TRUE" Then
+                    cell.Value = txtChecked.Text
+                Else
+                    cell.Value = txtUnChecked.Text
+                End If
+            Else
+                'xst.AlignHorz = XLAlignHorzEnum.Right
+                If sValue.ToString = "1" Then
+                    cell.Value = txtChecked.Text
+                Else
+                    cell.Value = txtUnChecked.Text
+                End If
+            End If
+        ElseIf sType = "D" AndAlso L3Int(tdbg(j, COL_IsDateTime)) = 0 AndAlso sValue.ToString <> "" Then
+            ''Update: 08/04/2011: Nếu là Ngày dạng "dd/MM/yyyy" thì chỉ lấy đúng 10 ký tự, để khỏi kéo rộng cột
+            ''  cell.Value = sValue.ToString.Substring(0, 10)
+            'If sValue.ToString <> "" Then
+            '    '  cell.Value = CType(sValue.ToString.Substring(0, 10), Date)
+            '    cell.Value = SQLDateShow(sValue)'bỏ theo ID 106365 vì dữ liệu Text Filter không nhóm theo năm tháng được
+            'Else
+            cell.Value = sValue
+            '  End If
         Else
-            Try
-                Dim sType As String 'Lấy kiểu dữ liệu để Format
-                Dim sValue As Object 'Lấy giá trị để Export
-                Dim k As Integer = 0
-                If chkDisplayTitle.Checked Then
-                    'Chuyển tiêu đề các cột cần xuất ra Excel (Chiếm 1 dòng trong Excel)
-                    For j As Integer = 0 To tdbg.RowCount - 1
-                        If L3Bool(tdbg(j, COL_IsUsed)) = True Then
-                            cell = sheet(iRow, iCol + j + k)
-                            If _useUnicode Then
-                                cell.Value = tdbg(j, COL_Description).ToString
-                            Else
-                                cell.Value = ConvertVniToUnicode(tdbg(j, COL_Description).ToString)
-                            End If
+            'Append 15/06/2012 Định dạng Giờ
+            If L3Int(tdbg(j, COL_IsDateTime)) = 2 Then 'Thêm : vào giờ
+                'xst.Format = "hh:mm:ss"
+                If IsDBNull(sValue) OrElse sValue Is Nothing OrElse sValue.ToString = "" Then
+                    cell.Value = sValue
+                Else
+                    If sValue.ToString.Length = 4 Then
+                        cell.Value = sValue.ToString.Insert(2, ":")
+                    ElseIf sValue.ToString.Length = 6 Then
+                        cell.Value = sValue.ToString.Insert(4, ":").Insert(2, ":")
+                    Else
+                        cell.Value = sValue
+                    End If
+                End If
+            Else
+                cell.Value = sValue
+            End If
+        End If
+    End Sub
 
-                            style.Font = New System.Drawing.Font("Arial", 10.0!, FontStyle.Bold)
-                            style.BackColor = Color.LightGray
-                            style.BorderBottom = XLLineStyleEnum.Thin
-                            style.BorderLeft = XLLineStyleEnum.Thin
-                            style.BorderTop = XLLineStyleEnum.Thin
-                            style.BorderRight = XLLineStyleEnum.Thin
-                            style.AlignHorz = XLAlignHorzEnum.Center 'Canh giữa tiêu đề
-                            cell.Style = style
-                        Else
-                            k = k - 1
+
+
+
+    Private Sub SetTiltle(ByVal book As C1XLBook, ByRef sheet As XLSheet, ByRef iRow As Integer, ByVal iCol As Integer)
+        If chkDisplayTitle.Checked = False Then Exit Sub
+        'Chuyển tiêu đề các cột cần xuất ra Excel (Chiếm 1 dòng trong Excel)
+        Dim cell As XLCell
+        Dim k As Integer = 0
+        Dim style As New C1.C1Excel.XLStyle(book)
+        For j As Integer = 0 To tdbg.RowCount - 1
+            If L3Bool(tdbg(j, COL_IsUsed)) = True AndAlso L3String(tdbg(j, COL_FieldName)).Trim <> "" Then
+                While dicFormula.ContainsKey(iCol + j + k)
+                    cell = sheet(iRow, iCol + j + k)
+                    cell.Value = ""
+                    cell.Style = SetTitleStyleXLS(style)
+                    k += 1
+                End While
+                cell = sheet(iRow, iCol + j + k)
+                If _useUnicode Then
+                    cell.Value = tdbg(j, COL_Description).ToString
+                Else
+                    cell.Value = ConvertVniToUnicode(tdbg(j, COL_Description).ToString)
+                End If
+                cell.Style = SetTitleStyleXLS(style)
+            Else
+                k = k - 1
+            End If
+        Next
+
+        Dim iInsertSplit As Integer = 0
+        k = 0
+        Dim c1CellRange As C1.C1Excel.XLCellRange
+        Dim iColMerge As Integer = iCol
+        Dim sCaptionMerge As String = ""
+        Dim sCaption As String = ""
+        If _tdbgFr.Splits.Count > 1 Then
+            sheet.Rows.Insert(iRow)
+            iInsertSplit = 1
+            For j As Integer = 0 To tdbg.RowCount - 1
+                If L3Bool(tdbg(j, COL_IsUsed)) = True AndAlso L3String(tdbg(j, COL_FieldName)).Trim <> "" Then
+                    While dicFormula.ContainsKey(iCol + j + k)
+                        cell = sheet(iRow, iCol + j + k)
+                        cell.Value = ""
+                        cell.Style = SetTitleStyleXLS(style)
+                        k += 1
+                    End While
+                    cell = sheet(iRow, iCol + j + k)
+                    sCaption = ReturnCaptionSplit(L3String(tdbg(j, COL_FieldName)).Trim)
+                    cell.Value = sCaption
+                    If L3String(cell.Value).Trim = "" Then
+                        c1CellRange = New XLCellRange(iRow, iRow + 1, iCol + j + k, iCol + j + k)
+                        cell.Value = sheet(iRow + 1, iCol + j + k).Value
+                        cell.Style = sheet(iRow + 1, iCol + j + k).Style
+                        sheet.MergedCells.Add(c1CellRange)
+                        c1CellRange = New XLCellRange(iRow, iRow + 1, iCol + j + k, iCol + j + k)
+                        c1CellRange.Style = SetTitleStyleXLS(style)
+                        sCaptionMerge = sCaption
+
+                    Else
+                        cell.Style = sheet(iRow + 1, iCol + j + k).Style
+                        If (sCaptionMerge <> sCaption AndAlso iColMerge <> iCol + j + k) OrElse j = tdbg.RowCount - 1 Then
+                            c1CellRange = New XLCellRange(iRow, iRow, iColMerge, iCol + j + k - 1 + L3Int(j = tdbg.RowCount - 1))
+                            sheet.MergedCells.Add(c1CellRange)
+                            iColMerge = iCol + j + k
+                            sCaptionMerge = sCaption
                         End If
-                    Next
-                    iRow = iRow + 1
+                    End If
+                Else
+                    k = k - 1
                 End If
+            Next
 
-                'Write to Excel and convert Font to Unicode
-                If bUnicode And _useUnicode = False And L3Bool(chkConvertUnicode.Tag) = False Then
-                    ConvertDataTable(dtExportTmp, arrDisabledColumn)
-                    chkConvertUnicode.Tag = True
+
+        End If
+        iRow = iRow + 1 + iInsertSplit
+    End Sub
+
+    Private Function ReturnCaptionSplit(sFieldName As String) As String
+        Dim sRet As String = ""
+        For i As Integer = 0 To _tdbgFr.Splits.Count - 1
+            If _tdbgFr.Splits(i).DisplayColumns(sFieldName).Visible Then sRet = _tdbgFr.Splits(i).Caption
+        Next
+        Return sRet
+    End Function
+
+    Private Sub Merge(ByVal i As Integer, ByVal j As Integer, ByRef sValue1 As Object, ByRef sValue2 As Object, ByRef iMergeFirstRow As Integer)
+        If L3Bool(tdbg(j, COL_IsMerge)) = False Then Exit Sub
+        If tdbg(j, COL_MergeRelative).ToString = "" Then 'không merge theo cột quan hệ (ví dụ: Số phiếu)
+            If sValue1 Is Nothing Then
+                sValue1 = dtExportTmp.Rows(i).Item(tdbg(j, COL_FieldName).ToString)
+                iMergeFirstRow = i
+            End If
+        Else 'merge theo cột quan hệ (ví dụ: Tiền NT merge theo Số phiếu)
+            If dtExportTmp.Columns.Contains("MergeWhere") Then 'Merge có điều kiện
+                'Tìm giá trị cột MergeWhere trong dtExportTmp không chứa giá trị của cột FieldName trên lưới thì được phép merge
+                If Not dtExportTmp.Rows(i).Item("MergeWhere").ToString.Contains(tdbg(j, COL_FieldName).ToString) Then
+                    If sValue1 IsNot Nothing And sValue2 Is Nothing Then
+                        sValue2 = dtExportTmp.Rows(i).Item(tdbg(j, COL_FieldName).ToString).ToString
+                        iMergeFirstRow = i
+                    ElseIf sValue1 Is Nothing And sValue2 Is Nothing Then
+                        sValue1 = dtExportTmp.Rows(i).Item(tdbg(j, COL_MergeRelative).ToString).ToString
+                        sValue2 = dtExportTmp.Rows(i).Item(tdbg(j, COL_FieldName).ToString).ToString
+                        iMergeFirstRow = i
+                    End If
                 End If
-                k = 0
-                For j As Integer = 0 To tdbg.RowCount - 1
-                    If L3Bool(tdbg(j, COL_IsUsed)) Then
-                        For i As Integer = 0 To dtExportTmp.Rows.Count - 1
-                            sType = tdbg(j, COL_DataType).ToString.Trim
-                            sValue = dtExportTmp.Rows(i).Item(tdbg(j, COL_FieldName).ToString)
-                            'Định dạng cho cột cho Excel
-                            If sType = "Percent" Then 'Định dạng Percent - Update 06/11/2012
-                                Dim xst As XLStyle = New XLStyle(sheet.Book)
-                                xst.BorderBottom = XLLineStyleEnum.Thin
-                                xst.BorderLeft = XLLineStyleEnum.Thin
-                                xst.BorderTop = XLLineStyleEnum.Thin
-                                xst.BorderRight = XLLineStyleEnum.Thin
-                                xst.AlignHorz = XLAlignHorzEnum.Right
-                                'sFormat = sType '"#,##0" & InsertZero(L3Int(tdbg(j, COL_NumberFormat)))
-                                xst.Format = "0.00%"
-                                sheet.Item(iRow + i, iCol + j + k).Style = xst
+            Else
+                If sValue1 IsNot Nothing And sValue2 Is Nothing Then
+                    sValue2 = dtExportTmp.Rows(i).Item(tdbg(j, COL_FieldName).ToString).ToString
+                    iMergeFirstRow = i
+                ElseIf sValue1 Is Nothing And sValue2 Is Nothing Then
+                    sValue1 = dtExportTmp.Rows(i).Item(tdbg(j, COL_MergeRelative).ToString).ToString
+                    sValue2 = dtExportTmp.Rows(i).Item(tdbg(j, COL_FieldName).ToString).ToString
+                    iMergeFirstRow = i
+                End If
+            End If
 
-                            ElseIf sType = "D" Then ' Date(D)
-                                Dim xst As XLStyle = New XLStyle(sheet.Book)
-                                xst.BorderBottom = XLLineStyleEnum.Thin
-                                xst.BorderLeft = XLLineStyleEnum.Thin
-                                xst.BorderTop = XLLineStyleEnum.Thin
-                                xst.BorderRight = XLLineStyleEnum.Thin
-                                xst.AlignHorz = XLAlignHorzEnum.Center
+        End If
+    End Sub
 
-                                If L3Int(tdbg(j, COL_IsDateTime)) = 1 Then
-                                    xst.Format = "dd/MM/yyyy hh:mm:ss"
-                                Else
-                                    xst.Format = "dd/mm/yyyy"
-                                End If
-                                sheet.Item(iRow + i, iCol + j + k).Style = xst
+    Private Sub MergeCell(ByRef sheet As XLSheet, ByVal i As Integer, ByVal j As Integer, ByVal k As Integer, ByRef sValue1 As Object, ByRef sValue2 As Object, ByVal iMergeFirstRow As Integer, ByRef iCount As Integer, ByVal iRow As Integer, ByVal iCol As Integer)
+        If L3Bool(tdbg(j, COL_IsMerge)) = False Then Exit Sub
+        Dim c1CellRange As XLCellRange
+        If tdbg(j, COL_MergeRelative).ToString = "" Then 'không merge theo cột quan hệ (ví dụ: Số phiếu)
+            If sValue1 = dtExportTmp.Rows(i).Item(tdbg(j, COL_FieldName).ToString) Then
+                iCount += 1
+            End If
+            If i = dtExportTmp.Rows.Count - 1 And iCount > 1 Then
+                c1CellRange = New XLCellRange(iMergeFirstRow + iRow, iRow + i, iCol + j + k, iCol + j + k)
+                sheet.MergedCells.Add(c1CellRange) 'merge dòng
 
-                            ElseIf sType = "N1" Then ' Boolean, Byte là cột checkbox
-                                Dim xst As XLStyle = New XLStyle(sheet.Book)
-                                xst.BorderBottom = XLLineStyleEnum.Thin
-                                xst.BorderLeft = XLLineStyleEnum.Thin
-                                xst.BorderTop = XLLineStyleEnum.Thin
-                                xst.BorderRight = XLLineStyleEnum.Thin
-                                'Trường hợp này dưới Database có kiểu dữ liệu Bit(0,1) -> DataTable có kiểu dữ liệu String(True,False)
-                                xst.AlignHorz = XLAlignHorzEnum.Center
+                For z As Integer = iMergeFirstRow + iRow + 1 To iRow + i 'xóa các dòng đã merge, chỉ giữ lại dòng merge đầu tiên
+                    sheet.Item(z, iCol + j + k).Value = Nothing
+                Next
 
-                                'Bỏ: chuyển về định dạn theo thiết lập ở dưới
-                                ''Update 07/07/2010: Giá trị = True thì format màu đỏ và canh giữa
-                                If sValue.ToString.ToUpper = "TRUE" Or sValue.ToString.ToUpper = "FALSE" Then
-                                    'xst.AlignHorz = XLAlignHorzEnum.Center
-                                    If sValue.ToString.ToUpper = "TRUE" Then xst.ForeColor = Color.Red
-                                Else
-                                    'xst.AlignHorz = XLAlignHorzEnum.Right
-                                    If sValue.ToString = "1" Then xst.ForeColor = Color.Red
-                                End If
+                sValue1 = Nothing
+                iCount = 0
+            ElseIf i < dtExportTmp.Rows.Count - 1 Then
+                If sValue1 <> dtExportTmp.Rows(i + 1).Item(tdbg(j, COL_FieldName).ToString) Then
+                    If iCount > 1 Then
+                        c1CellRange = New XLCellRange(iMergeFirstRow + iRow, iRow + i, iCol + j + k, iCol + j + k)
+                        sheet.MergedCells.Add(c1CellRange) 'merge dòng
 
-                                sheet.Item(iRow + i, iCol + j + k).Style = xst
-                            ElseIf sType = "N2" Then 'dạng số nguyên, không thập phân
-                                Dim xst As XLStyle = New XLStyle(sheet.Book)
-                                xst.BorderBottom = XLLineStyleEnum.Thin
-                                xst.BorderLeft = XLLineStyleEnum.Thin
-                                xst.BorderTop = XLLineStyleEnum.Thin
-                                xst.BorderRight = XLLineStyleEnum.Thin
-                                xst.AlignHorz = XLAlignHorzEnum.Right
-                                sFormat = "#,##0"
-                                xst.Format = sFormat
+                        For z As Integer = iMergeFirstRow + iRow + 1 To iRow + i 'xóa các dòng đã merge, chỉ giữ lại dòng merge đầu tiên
+                            sheet.Item(z, iCol + j + k).Value = Nothing
+                        Next
+                    End If
 
-                                sheet.Item(iRow + i, iCol + j + k).Style = xst
-                            ElseIf sType = "N" Then ' Number(N)
-                                Dim xst As XLStyle = New XLStyle(sheet.Book)
-                                xst.BorderBottom = XLLineStyleEnum.Thin
-                                xst.BorderLeft = XLLineStyleEnum.Thin
-                                xst.BorderTop = XLLineStyleEnum.Thin
-                                xst.BorderRight = XLLineStyleEnum.Thin
-                                xst.AlignHorz = XLAlignHorzEnum.Right
-                                sFormat = "#,##0" & InsertZero(L3Int(tdbg(j, COL_NumberFormat)))
-                                xst.Format = sFormat
+                    sValue1 = Nothing
+                    iCount = 0
+                End If
+            End If
 
-                                sheet.Item(iRow + i, iCol + j + k).Style = xst
+        Else  'merge theo cột quan hệ (ví dụ: Tiền NT merge theo Số phiếu)
+            If sValue1 = dtExportTmp.Rows(i).Item(tdbg(j, COL_MergeRelative).ToString) And sValue2 = dtExportTmp.Rows(i).Item(tdbg(j, COL_FieldName).ToString) Then
+                iCount += 1
+            End If
+            If i = dtExportTmp.Rows.Count - 1 And iCount > 1 Then
+                c1CellRange = New XLCellRange(iMergeFirstRow + iRow, iRow + i, iCol + j + k, iCol + j + k)
+                sheet.MergedCells.Add(c1CellRange) 'merge dòng
 
-                            Else 'String(S)
-                                Dim xst As XLStyle = New XLStyle(sheet.Book)
-                                xst.BorderBottom = XLLineStyleEnum.Thin
-                                xst.BorderLeft = XLLineStyleEnum.Thin
-                                xst.BorderTop = XLLineStyleEnum.Thin
-                                xst.BorderRight = XLLineStyleEnum.Thin
-                                xst.AlignHorz = XLAlignHorzEnum.Left
-                                sheet.Item(iRow + i, iCol + j + k).Style = xst
-                            End If
+                For z As Integer = iMergeFirstRow + iRow + 1 To iRow + i 'xóa các dòng đã merge, chỉ giữ lại dòng merge đầu tiên
+                    sheet.Item(z, iCol + j + k).Value = Nothing
+                Next
+
+                sValue1 = Nothing
+                sValue2 = Nothing
+                iCount = 0
+            ElseIf i < dtExportTmp.Rows.Count - 1 Then
+                If sValue1 = dtExportTmp.Rows(i + 1).Item(tdbg(j, COL_MergeRelative).ToString) And sValue2 <> dtExportTmp.Rows(i + 1).Item(tdbg(j, COL_FieldName).ToString) Then
+                    If iCount > 1 Then
+                        c1CellRange = New XLCellRange(iMergeFirstRow + iRow, iRow + i, iCol + j + k, iCol + j + k)
+                        sheet.MergedCells.Add(c1CellRange) 'merge dòng
+
+                        For z As Integer = iMergeFirstRow + iRow + 1 To iRow + i 'xóa các dòng đã merge, chỉ giữ lại dòng merge đầu tiên
+                            sheet.Item(z, iCol + j + k).Value = Nothing
+                        Next
+                    End If
+
+                    sValue2 = Nothing
+                    iCount = 0
+                ElseIf sValue1 <> dtExportTmp.Rows(i + 1).Item(tdbg(j, COL_MergeRelative).ToString) Then
+                    If iCount > 1 Then
+                        c1CellRange = New XLCellRange(iMergeFirstRow + iRow, iRow + i, iCol + j + k, iCol + j + k)
+                        sheet.MergedCells.Add(c1CellRange) 'merge dòng
+
+                        For z As Integer = iMergeFirstRow + iRow + 1 To iRow + i 'xóa các dòng đã merge, chỉ giữ lại dòng merge đầu tiên
+                            sheet.Item(z, iCol + j + k).Value = Nothing
+                        Next
+                    End If
+
+                    sValue1 = Nothing
+                    sValue2 = Nothing
+                    iCount = 0
+                End If
+            End If
+        End If
+    End Sub
+
+    'Insert dòng trong Excel dựa vào dữ liệu xuất
+    Private Sub InsertRowExcel(ByRef sheet As XLSheet, ByVal iRow As Integer, ByVal iTotalRow As Integer)
+        Try
+            sheet(iRow, 1).Value = "" 'lỗi khi insert dòng chưa nhập liệu
+            For i As Integer = 0 To iTotalRow - 1
+                sheet.Rows.Insert(iRow)
+            Next
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+
+    Private Sub CallExport(ByRef book As C1XLBook, ByRef sheet As XLSheet, ByVal iUsedCol As Integer, ByVal iRow As Integer, ByVal iCol As Integer, ByVal iRowBegin As Integer, ByVal iRowEnd As Integer)
+        ProcessOptions(book, sheet)
+        Try
+            If txtPathIn.Text <> "" AndAlso chkIsNoFormula.Checked = False Then 'Thêm dòng vào Excel nếu có thiết lập mẫu và không kiểm tra công thức
+                'Dùng cho trường hợp giữ lại phần Footer của file có sẵn
+                Dim iTotalRow As Integer = iRowEnd - iRowBegin + 1
+                If chkDisplayTitle.Checked Then iTotalRow += 1
+                If chkShowSum.Checked Then
+                    Dim dr() As DataRow = dtGrid.Select("IsSum=1 And " & "IsUsed=1")
+                    If dr.Length > 0 Then iTotalRow += 1
+                End If
+                InsertRowExcel(sheet, iRow, iTotalRow)
+            End If
+
+            Dim sFormat As String = ""
+            Dim cell As XLCell
+
+            '********************
+            SetTiltle(book, sheet, iRow, iCol) 'Set dòng tiêu đề
+            ''Write to Excel and convert Font to Unicode
+            'If bUnicode And _useUnicode = False And L3Bool(chkConvertUnicode.Tag) = False Then
+            '    ConvertDataTable(dtExportTmp, arrDisabledColumn)
+            '    chkConvertUnicode.Tag = True
+            'End If
+
+            Dim k As Integer = 0
+            Dim iRowExcel As Integer = 0 'Số dòng Excel cho bắt đầu mỗi Sheet
+            Dim bIsSum As Boolean = False
+            ''Merge
+            Dim sValue1 As Object, sValue2 As Object
+            Dim iCount As Integer = 0, iMergeFirstRow As Integer = 0
+            ''End Merge
+
+            For j As Integer = 0 To tdbg.RowCount - 1
+                Dim sType As String = tdbg(j, COL_DataType).ToString.Trim
+                'If j = 106 Then
+                '    MessageBox.Show("abc")
+                'End If
+                If L3Bool(tdbg(j, COL_IsUsed)) AndAlso L3String(tdbg(j, COL_FieldName)).Trim <> "" Then
+                    While dicFormula.ContainsKey(iCol + j + k) 'Nếu cột công thức thì tăng lên 1
+                        iRowExcel = iRowEnd - iRowBegin + 1
+                        SetFooterCellXLS(sheet, bIsSum, sType, j, iRow + iRowExcel, iCol + j + k, sFormat)
+                        k += 1
+                    End While
+                    iRowExcel = 0
+                    ' dSum = Nothing
+                    sValue1 = Nothing
+                    sValue2 = Nothing
+                    iCount = 0
+                    'For i As Integer = 0 To dtExportTmp.Rows.Count - 1
+                    For i As Integer = iRowBegin To iRowEnd
+                        Try
+                            Merge(i, j, sValue1, sValue2, iMergeFirstRow)
+                            '  If j = 6 And i = 265178 Then MessageBox.Show("1")
                             'Export Value to Excel
-                            cell = sheet(iRow + i, iCol + j + k)
-
-                            'Gán lại giá trị định dạng cell
-                            If sType = "N1" Then ' Boolean, Byte
-                                cell.Value = sValue
-                                'Update: 09/09/2010: Set lại giá trị theo Thiết lập
-                                If sValue.ToString.ToUpper = "TRUE" Or sValue.ToString.ToUpper = "FALSE" Then
-                                    'xst.AlignHorz = XLAlignHorzEnum.Center
-                                    If sValue.ToString.ToUpper = "TRUE" Then
-                                        cell.Value = txtChecked.Text
-                                    Else
-                                        cell.Value = txtUnChecked.Text
-                                    End If
-                                Else
-                                    'xst.AlignHorz = XLAlignHorzEnum.Right
-                                    If sValue.ToString = "1" Then
-                                        cell.Value = txtChecked.Text
-                                    Else
-                                        cell.Value = txtUnChecked.Text
-                                    End If
-                                End If
-                            ElseIf sType = "D" AndAlso L3Int(tdbg(j, COL_IsDateTime)) = 0 AndAlso sValue.ToString <> "" Then
-                                'Update: 08/04/2011: Nếu là Ngày dạng "dd/MM/yyyy" thì chỉ lấy đúng 10 ký tự, để khỏi kéo rộng cột
-                                '  cell.Value = sValue.ToString.Substring(0, 10)
-                                If sValue.ToString <> "" Then
-
-                                    cell.Value = CType(sValue.ToString.Substring(0, 10), Date)
-
-                                Else
-
-                                    cell.Value = sValue
-
-                                End If
-                            Else
-                                cell.Value = sValue
-                                'cell.Style.Format = "Percent"
-                            End If
-
+                            Dim sValue As Object = dtExportTmp.Rows(i).Item(tdbg(j, COL_FieldName).ToString)
+                            cell = sheet(iRow + iRowExcel, iCol + j + k)
+                            cell.Style = SetCellStyleXLS(sheet.Book, sType, sValue, sFormat, j) 'Định dạng cell
+                            '  If j = 6 And i = 265178 Then MessageBox.Show("2")
+                            SetCellValueXLS(cell, sType, sValue, j) 'Gán lại giá trị định dạng cell
+                            '   If j = 6 And i = 265178 Then MessageBox.Show("3")
                             'Gán giá trị cho các Cell, nếu cột số = 0 thì gán lại = ''
-                            If sheet.Item(iRow + i, iCol + j + k).Style.AlignHorz = XLAlignHorzEnum.Right And sType <> "N1" And sType <> "Percent" Then
+                            If sheet.Item(iRow + iRowExcel, iCol + j + k).Style.AlignHorz = XLAlignHorzEnum.Right And sType <> "N1" And sType <> "Percent" And sType.Contains("%") = False Then
                                 If ConvertMoney(sValue, sFormat) = 0 Then cell.Value = ""
                             End If
-
+                            '  If j = 6 And i = 265178 Then MessageBox.Show("4")
+                            iRowExcel += 1
                             '****************************************************
-                            'Lê Phương bổ sung ngày 18/01/2013: Xuất Excel theo định dạng lưới
-                            'Dữ liệu cột Style là tập hợp giá trị định dạng của dòng và cell
-                            'Nếu có sự kiện FechtRowStyle thì lưu--> (định dạng font chữ,màu chữ ,màu nền)
-                            'Nếu cell nào có sự kiện FechtCellStyle thì lưu--> FieldName(định dạng font chữ,màu chữ ,màu nền)
-                            'Dữ liệu cột Style sẽ có dạng-->(định dạng font chữ,màu chữ ,màu nền);FieldName(định dạng font chữ,màu chữ ,màu nền)
-                            If dtExportTmp.Columns.Contains(COL_StyleExcel) Then
-                                Dim arrayStyle() As String = dtExportTmp.Rows(i).Item(COL_StyleExcel).ToString.Split(";"c)
-                                If arrayStyle.Length > 0 Then
-                                    If arrayStyle(0).ToString.StartsWith("(") Then 'Sự kiện FechRowStyle
-                                        'Cắt 2 ký tự ()ở đầu và cuối để lấy ra giá trị của sự kiện FechRowStyle
-                                        arrayStyle(0) = arrayStyle(0).Substring(1, arrayStyle(0).Length - 2)
-                                        'Gán giá trị của sự kiện FechtRowStyle
-                                        SetCellStyle(cell, arrayStyle(0))
-                                        '**********************
-                                        'Gán giá trị của sự kiện FechtCellStyle
-                                        For iarrayStyle As Integer = 1 To arrayStyle.Length - 1
-                                            Dim arrayCell() As String = arrayStyle(iarrayStyle).Split("("c, ")"c)
-                                            If arrayCell.Length > 0 AndAlso arrayCell(0) = tdbg(j, COL_FieldName).ToString Then
-                                                SetCellStyle(cell, arrayCell(1))
-                                                Exit For
-                                            End If
-                                        Next
-                                    Else 'Chi có sự kiện FetchCellStyle
-                                        For iarrayStyle As Integer = 0 To arrayStyle.Length - 1
-                                            Dim arrayCell() As String = arrayStyle(iarrayStyle).Split("("c, ")"c)
-                                            If arrayCell.Length > 0 AndAlso arrayCell(0) = tdbg(j, COL_FieldName).ToString Then
-                                                SetCellStyle(cell, arrayCell(1))
-                                                Exit For
-                                            End If
-                                        Next
-                                    End If
-                                End If
-                            End If
-                        Next
-                    Else
-                        k = k - 1
+                            SetCellStyle(cell, i, j)
+                            ' If j = 6 And i = 265178 Then MessageBox.Show("5")
+                            'Merge
+                            MergeCell(sheet, i, j, k, sValue1, sValue2, iMergeFirstRow, iCount, iRow, iCol)
+                        Catch ex As Exception
+                            D99C0008.MsgL3(ex.ToString)
+                        End Try
+                    Next
+                    SetFooterCellXLS(sheet, bIsSum, sType, j, iRow + iRowExcel, iCol + j + k, sFormat)
+                Else
+                    k = k - 1
+                End If
+            Next
+            'Nếu không có Sum thì xóa dòng Footer Sum 
+            If chkShowSum.Checked AndAlso Not bIsSum Then
+                sheet.Rows.RemoveAt(iRowExcel + iRow)
+            End If
+
+        Catch ex As Exception
+            D99C0008.MsgL3(ex.ToString)
+        End Try
+    End Sub
+
+    Private Sub SetCellStyle(ByRef cell As XLCell, ByVal i As Integer, ByVal j As Integer)
+        'Lê Phương bổ sung ngày 18/01/2013: Xuất Excel theo định dạng lưới
+        'Dữ liệu cột Style là tập hợp giá trị định dạng của dòng và cell
+        'Nếu có sự kiện FechtRowStyle thì lưu--> (định dạng font chữ,màu chữ ,màu nền)
+        'Nếu cell nào có sự kiện FechtCellStyle thì lưu--> FieldName(định dạng font chữ,màu chữ ,màu nền)
+        'Dữ liệu cột Style sẽ có dạng-->(định dạng font chữ,màu chữ ,màu nền);FieldName(định dạng font chữ,màu chữ ,màu nền)
+        If dtExportTmp.Columns.Contains(COL_StyleExcel) = False Then Exit Sub
+        Dim arrayStyle() As String = dtExportTmp.Rows(i).Item(COL_StyleExcel).ToString.Split(";"c)
+        If arrayStyle.Length > 0 Then
+            If arrayStyle(0).ToString.StartsWith("(") Then 'Sự kiện FechRowStyle
+                'Cắt 2 ký tự ()ở đầu và cuối để lấy ra giá trị của sự kiện FechRowStyle
+                arrayStyle(0) = arrayStyle(0).Substring(1, arrayStyle(0).Length - 2)
+                'Gán giá trị của sự kiện FechtRowStyle
+                SetCellStyle(cell, arrayStyle(0))
+                '**********************
+                'Gán giá trị của sự kiện FechtCellStyle
+                For iarrayStyle As Integer = 1 To arrayStyle.Length - 1
+                    Dim arrayCell() As String = arrayStyle(iarrayStyle).Split("("c, ")"c)
+                    If arrayCell.Length > 0 AndAlso arrayCell(0) = tdbg(j, COL_FieldName).ToString Then
+                        SetCellStyle(cell, arrayCell(1))
+                        Exit For
                     End If
                 Next
-            Catch ex As Exception
-                D99C0008.MsgL3(ex.ToString)
-            End Try
+            Else 'Chi có sự kiện FetchCellStyle
+                For iarrayStyle As Integer = 0 To arrayStyle.Length - 1
+                    Dim arrayCell() As String = arrayStyle(iarrayStyle).Split("("c, ")"c)
+                    If arrayCell.Length > 0 AndAlso arrayCell(0) = tdbg(j, COL_FieldName).ToString Then
+                        SetCellStyle(cell, arrayCell(1))
+                        Exit For
+                    End If
+                Next
+            End If
         End If
-
     End Sub
+
+    Private Function convertColor(ByVal sColor As String) As Drawing.Color
+        Dim cColor As Drawing.Color
+        If sColor.StartsWith("#") Then
+            cColor = ColorTranslator.FromHtml(sColor)
+        ElseIf IsNumeric(sColor) Then
+            cColor = Color.FromArgb(L3Int(sColor))
+        Else
+            cColor = Color.FromName(sColor)
+        End If
+        Return cColor
+    End Function
 
     Private Sub SetCellStyle(ByRef cell As XLCell, ByVal sValue As String)
         Dim FontStyle() As String = sValue.Split(","c)
+        If FontStyle.Length = 0 Then Exit Sub
         'Mảng cắt ra gồm 3 phần tử theo thứ tự: Các định dạng font, Màu chữ, Mau nền
         'Gán Màu chữ or màu nền khi có giá trị <>""
         '***************************************
-        'Set màu chữ
-        If FontStyle(1) <> "" Then cell.Style.ForeColor = Color.FromArgb(L3Int(FontStyle(1)))
+        'Set màu chữ Ánh sửa 29/09/2016
+        If FontStyle.Length > 1 AndAlso FontStyle(1).Trim <> "" Then
+            cell.Style.ForeColor = convertColor(FontStyle(1).Trim)
+            'If FontStyle(1).Trim.StartsWith("#") Then
+            '    cell.Style.ForeColor = ColorTranslator.FromHtml(FontStyle(1).Trim)
+            'Else
+            '    cell.Style.ForeColor = Color.FromArgb(L3Int(FontStyle(1)))
+            'End If
+        End If
+
         'Set màu nền
-        If FontStyle(2) <> "" Then cell.Style.BackColor = Color.FromArgb(L3Int(FontStyle(2)))
+        If FontStyle.Length > 2 AndAlso FontStyle(2) <> "" Then
+            cell.Style.BackColor = convertColor(FontStyle(2).Trim)
+            'If FontStyle(2).Trim.StartsWith("#") Then
+            '    cell.Style.BackColor = ColorTranslator.FromHtml(FontStyle(2).Trim)
+            'Else
+            '    cell.Style.BackColor = Color.FromArgb(L3Int(FontStyle(2)))
+            'End If
+        End If
+
         '***************************************
-        'Định dạng font chữ
-        Select Case FontStyle(0)
-            Case "B"
-                cell.Style.Font = FontUnicode(gbUnicode, Drawing.FontStyle.Bold)
-            Case "I"
-                cell.Style.Font = FontUnicode(gbUnicode, Drawing.FontStyle.Italic)
-            Case "U"
-                cell.Style.Font = FontUnicode(gbUnicode, Drawing.FontStyle.Underline)
-            Case "BI"
-                cell.Style.Font = FontUnicode(gbUnicode, Drawing.FontStyle.Bold Or Drawing.FontStyle.Italic)
-            Case "IU"
-                cell.Style.Font = FontUnicode(gbUnicode, Drawing.FontStyle.Italic Or Drawing.FontStyle.Underline)
-            Case "BU"
-                cell.Style.Font = FontUnicode(gbUnicode, Drawing.FontStyle.Bold Or Drawing.FontStyle.Underline)
-            Case "BIU"
-                cell.Style.Font = FontUnicode(gbUnicode, Drawing.FontStyle.Underline Or Drawing.FontStyle.Bold Or Drawing.FontStyle.Italic)
-        End Select
+        'Định dạng font chữ        'Bổ sung ngày 19/11/2013
+        Dim bConvertUnicode As Boolean = True ' chkConvertUnicode.Checked
+        Dim newStyle As Drawing.FontStyle
+        Dim style As String = FontStyle(0).Trim
+        If style <> "" Then
+            If style.ToUpper.Contains("B") Then newStyle = Drawing.FontStyle.Bold
+            If style.ToUpper.Contains("I") Then newStyle = newStyle Or Drawing.FontStyle.Italic
+            If style.ToUpper.Contains("U") Then newStyle = newStyle Or Drawing.FontStyle.Underline
+            If cell.Style.Font Is Nothing Then
+                cell.Style.Font = FontUnicode(gbUnicode OrElse bConvertUnicode, newStyle)
+            Else
+                cell.Style.Font = New System.Drawing.Font(cell.Style.Font.Name, cell.Style.Font.Size, newStyle, GraphicsUnit.Point)
+            End If
+        End If
+
+        'Select Case FontStyle(0)
+        '    Case "B"
+        '        ' 8/5/2014 - Khi in đậm xuất bị lỗi do cell.Style.Font = nothing
+        '        If cell.Style.Font Is Nothing Then
+        '            cell.Style.Font = FontUnicode(gbUnicode OrElse bConvertUnicode, Drawing.FontStyle.Bold)
+        '        Else ' Trường hợp ngoại lệ
+        '            cell.Style.Font = New System.Drawing.Font(cell.Style.Font.Name, cell.Style.Font.Size, Drawing.FontStyle.Bold, GraphicsUnit.Point) ' = FontUnicode(gbUnicode OrElse bConvertUnicode, Drawing.FontStyle.Bold)
+        '        End If
+        '    Case "I"
+        '        cell.Style.Font = FontUnicode(gbUnicode OrElse bConvertUnicode, Drawing.FontStyle.Italic)
+        '    Case "U"
+        '        cell.Style.Font = FontUnicode(gbUnicode OrElse bConvertUnicode, Drawing.FontStyle.Underline)
+        '    Case "BI"
+        '        cell.Style.Font = FontUnicode(gbUnicode OrElse bConvertUnicode, Drawing.FontStyle.Bold Or Drawing.FontStyle.Italic)
+        '    Case "IU"
+        '        cell.Style.Font = FontUnicode(gbUnicode OrElse bConvertUnicode, Drawing.FontStyle.Italic Or Drawing.FontStyle.Underline)
+        '    Case "BU"
+        '        cell.Style.Font = FontUnicode(gbUnicode OrElse bConvertUnicode, Drawing.FontStyle.Bold Or Drawing.FontStyle.Underline)
+        '    Case "BIU"
+        '        cell.Style.Font = FontUnicode(gbUnicode OrElse bConvertUnicode, Drawing.FontStyle.Underline Or Drawing.FontStyle.Bold Or Drawing.FontStyle.Italic)
+        'End Select
     End Sub
 
     Private Sub btnExport_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnExport.Click
+        If EXL Is Nothing Then EXL = CreateObject("Excel.Application")
+
         If Not AllowExport() Then Exit Sub
         Me.Cursor = Cursors.WaitCursor
         btnExport.Enabled = False
         bUnicode = False
         Dim book As C1XLBook
         book = New C1XLBook()
+        book.CompatibilityMode = CompatibilityMode.Excel2007
         Dim sheet As XLSheet
 
         iSheetData = 1
         iSheetPivot = 0
-        '***************************
+        Dim fileName As String = DEFAULT_PATH_OUT + "\Data.xlsx"
+        fileName = ExportMaster(fileName)
+        If fileName = "" Then Me.Cursor = Cursors.Default : btnExport.Enabled = True : Exit Sub
+        '  If fileName.ToLower.EndsWith(".xlsx") = False Then MaxRowExcel = 65000 : book.CompatibilityMode = CompatibilityMode.Excel2003'Bỏ vì V4.1 Excel2007 trở lên
+
         sheet = book.Sheets(0)
         'Kiểm tra trước khi xuất
-        If Not CheckExport(book, sheet) Then Exit Sub
+        If Not CheckExport(book, sheet, fileName) Then Me.Cursor = Cursors.Default : Exit Sub
         '***************************
+
         'Lấy dữ liệu xuất excel
         SortDatatable()
         '***************************
         'Đếm số cột được check dùng
         Dim iUsedCol As Integer = GetDisabledColumn()
         '***************************
-        'Định dạng xuất
-        CallExport(book, sheet, iUsedCol)
-        '***************************
-        'Fix the columns's size
-        AutoSizeColumns(sheet)
 
-        '-------------------------------------------
-        'Minh Hòa Update 01/09/2010: MergedCells nên để sau AutoSizeColumns
-        If chkIsExportType.Checked = False Or optPivotTable.Checked = False Then ProcessOptions(book, sheet)
-        '-------------------------------------------
+        'Update 18/07/2014: incident 67372  nếu số dòng vượt quá 1 Sheet thì tách thành nhiều sheet khác
+        Dim iRow, iCol As Integer
+        If CheckInvalidExport(iUsedCol, iRow, iCol) Then Exit Sub
+
+        Dim iRowBegin As Integer
+        Dim iRowEnd As Integer = MaxRowExcel
+
+        For i As Integer = 0 To iMaxSheet - 1
+            If i > 0 Then
+                book.Sheets.Add()
+                sheet = book.Sheets(i)
+                sheet.Name = "Data" & i
+            End If
+
+            'Định dạng xuất
+            iRowBegin = i * MaxRowExcel
+            If iRowEnd > dtExportTmp.Rows.Count Then
+                iRowEnd = dtExportTmp.Rows.Count
+            End If
+
+
+            CallExport(book, sheet, iUsedCol, iRow, iCol, iRowBegin, iRowEnd - 1)
+            ''***************************
+            'Update 05/06/2015: Incident 76315
+            If chkIsAutoSizeColumn.Checked Then
+                'Fix the columns's size
+                AutoSizeColumns(sheet)
+            End If
+
+            '-------------------------------------------
+            'Minh Hòa Update 01/09/2010: MergedCells nên để sau AutoSizeColumns
+            If chkIsExportType.Checked = False Or optPivotTable.Checked = False Then ProcessOptions(book, sheet)
+            '-------------------------------------------
+            iRowEnd += MaxRowExcel
+
+            '  sheet.Rows.Insert(iRow)
+        Next
+
 
         'Update 07/07/2010
 ErrorOpenFile:
-        Dim fileName As String = Application.StartupPath + "\Data.xls"
         Try
-            If txtPath.Text.Trim = "" Then
+
+            If txtPathIn.Text.Trim = "" AndAlso txtPathOut.Text.Trim = "" Then
                 'Save the file
                 book.Save(fileName)
             Else
-                'Save the file
-                fileName = txtPath.Text
                 book.Sheets.SelectedIndex = cboDefaultSheet.SelectedIndex 'Update 09/09/2010
-                book.Save(fileName)
+                ' book.Save(fileName) 'Lê Anh Vũ: 24/08/2015 - TH có dùng File mẫu thì không dùng hàm này được vì bị lỗi trên .NET 4.0 (Desktop)
+                SaveData(book, fileName)
             End If
 
             '*****************************************
@@ -1971,17 +2567,18 @@ ErrorOpenFile:
             'Update 03/11/2011: Sửa lại lấy CultureInfo theo ngôn ngữ hiện có
             'Fix lỗi theo 56017
             Try
+
                 Dim newCulture As System.Globalization.CultureInfo
                 Dim OldCulture As System.Globalization.CultureInfo
 
                 OldCulture = System.Threading.Thread.CurrentThread.CurrentCulture
-                newCulture = New System.Globalization.CultureInfo( _
-                                EXL.LanguageSettings.LanguageID(Microsoft.Office.Core.MsoAppLanguageID.msoLanguageIDUI))
+                newCulture = EXL.LanguageSettings.LanguageID(2) 'EXL.LanguageSettings.LanguageID(Microsoft.Office.Core.MsoAppLanguageID.msoLanguageIDUI)
                 System.Threading.Thread.CurrentThread.CurrentCulture = newCulture
             Catch ex As Exception
                 ' D99C0008.MsgL3(ex.Message)
             End Try
             '*****************************************
+
             'Update 10/11/2009
             'Kiểm tra có check vào Dạng xuất không?
             If Not chkIsExportType.Checked Then 'Xuất thường
@@ -1996,8 +2593,9 @@ ErrorOpenFile:
                     ExportSubTotals(fileName, iUsedCol)
                     'BoldSubTotals(fileName)
                     'Dim EXL As New Excel.Application
-                    EXL.Workbooks.Open(fileName)
-                    EXL.Visible = True
+                    'EXL.Workbooks.Open(fileName)
+                    'EXL.Visible = True
+                    Process.Start(fileName)
                 End If
             End If
             'Update 03/11/2011: trả lại CultureInfo hiện có
@@ -2013,11 +2611,44 @@ ErrorOpenFile:
         Me.Cursor = Cursors.Default
     End Sub
 
+    'Private Sub SaveData(ByVal book As C1XLBook, ByRef fileName As String)
+    '    Dim sPathOld As String = fileName
+    '    If chkIsMarkTimer.Checked Then
+    '        fileName = txtPathIn.Text.Trim()
+    '    Else
+    '        IO.File.Delete(fileName)
+    '        Dim name As String = Strings.Left(fileName, fileName.LastIndexOf("."c)) 'lấy tên file
+    '        fileName = fileName.Replace(name, name & "" & Format(Now, "yyMMdd")) 'namefile_yyMMdd
+    '    End If
+    '    Try
+    '        book.Save(fileName) '.NET 4.0 bị lỗi khi lưu đè lên 
+    '        IO.File.Delete(sPathOld)
+    '    Catch ex As Exception
+
+    '    End Try
+    'End Sub
+
+    Private Sub SaveData(ByVal book As C1XLBook, ByRef fileName As String)
+        Dim sPathOld As String = fileName
+        Dim name As String = Strings.Left(fileName, fileName.LastIndexOf("."c)) 'lấy tên file
+        If chkIsMarkTimer.Checked Then
+            fileName = fileName.Replace(name, name & "" & Format(Now, "yyMMdd")) 'namefile_yyMMdd
+        Else
+            fileName = fileName.Replace(name, name.Substring(0, name.Length - 1))
+        End If
+        Try
+            book.Save(fileName) '.NET 4.0 bị lỗi khi lưu đè lên 
+            IO.File.Delete(sPathOld)
+        Catch ex As Exception
+        End Try
+    End Sub
+
     '*** Update 07/07/2010: Các tiến trình chạy song song giúp cải thiện tốc độ chạy của chương trình
 #Region "Dùng Threading để cải thiện tốc độ chạy của chương trình"
 
     Private Sub BackProcessLoad()
-        If EXL Is Nothing Then EXL = New Excel.Application
+        'If EXL Is Nothing Then EXL = New Excel.Application
+        If EXL Is Nothing Then EXL = CreateObject("Excel.Application")
         bIsLoadEXL = True
         Threading.Thread.CurrentThread.Abort()
     End Sub
@@ -2033,17 +2664,18 @@ ErrorOpenFile:
 #End Region
 
     Private Sub OpenExcelApp(ByVal fileName As String)
-        EXL.Workbooks.Open(fileName)
-        EXL.Visible = True
+        'EXL.Workbooks.Open(fileName)
+        'EXL.Visible = True
+        Process.Start(fileName)
     End Sub
 
     Private Function CloseProcessWindow(ByVal fileName As String, Optional ByVal bShowMessage As Boolean = True) As Boolean
         Dim bClosed As Boolean = False
         Try
-            For Each wbExcel As Excel.Workbook In EXL.Workbooks
-                If wbExcel.FullName = fileName Then
+            For Each wbExcel As Object In EXL.Workbooks 'Excel.Workbook In EXL.Workbooks
+                If wbExcel.FullName.ToLower = fileName.ToLower Then
                     If bShowMessage Then
-                        If (D99C0008.MsgAsk(r("Ban_phai_dong_File") & Space(1) & fileName.Substring(fileName.LastIndexOf("\") + 1) & Space(1) & r("truoc_khi_xuat_Excel") & "." & vbCrLf & r("Ban_co_muon_dong_khong")) = Windows.Forms.DialogResult.Yes) Then
+                        If (D99C0008.MsgAsk(rL3("Ban_phai_dong_File") & Space(1) & fileName.Substring(fileName.LastIndexOf("\") + 1) & Space(1) & rL3("truoc_khi_xuat_Excel") & "." & vbCrLf & rL3("Ban_co_muon_dong_khong")) = Windows.Forms.DialogResult.Yes) Then
                             wbExcel.Save()
                             wbExcel.Close()
                             If EXL.Workbooks.Count = 0 Then
@@ -2070,14 +2702,21 @@ ErrorOpenFile:
         'Doan code dung de dong file Excel mo san (khong phai do Chuong trinh mo)
         If Not bClosed Then
             Dim p As System.Diagnostics.Process = Nothing
-            Dim sWindowName As String = "Microsoft Excel - Data.xls"
-            If txtPath.Text <> "" Then
-                sWindowName = "Microsoft Excel - " & txtPath.Text.Substring(txtPath.Text.LastIndexOf("\") + 1)
+            'Dim sWindowName As String = "Microsoft Excel - Data.xls"
+            Dim sWindowName As String = "Microsoft Excel - Data"
+            If txtPathIn.Text <> "" Then
+                'Update 09/7/2015: phải lấy tên file
+                'sWindowName = "Microsoft Excel - " & txtPath.Text.Substring(txtPath.Text.LastIndexOf("\") + 1)
+                sWindowName = "Microsoft Excel - " & fileName.Substring(fileName.LastIndexOf("\") + 1)
+                sWindowName = sWindowName.Substring(0, sWindowName.LastIndexOf("."))
             End If
             Try
                 For Each pr As Process In Process.GetProcessesByName("EXCEL")
-	'Update 05/04/2013
+                    'Update 05/04/2013
+                    If pr.MainWindowTitle = "" Then Continue For
+
                     If pr.MainWindowTitle.Contains(sWindowName) OrElse pr.MainWindowTitle = sWindowName.Substring(0, sWindowName.LastIndexOf(".")) Then
+                        'If pr.MainWindowTitle.Contains(sWindowName) Then
                         If p Is Nothing Then
                             p = pr
                         ElseIf p.StartTime < pr.StartTime Then
@@ -2086,10 +2725,10 @@ ErrorOpenFile:
                     End If
                 Next
                 If p IsNot Nothing Then
-	'Update 05/04/2013
+                    'Update 05/04/2013
                     Me.BringToFront()
                     Me.Activate()
-                    If (D99C0008.MsgAsk(r("Ban_phai_dong_File") & Space(1) & fileName.Substring(fileName.LastIndexOf("\") + 1) & Space(1) & r("truoc_khi_xuat_Excel") & "." & vbCrLf & r("Ban_co_muon_dong_khong")) = Windows.Forms.DialogResult.Yes) Then
+                    If (D99C0008.MsgAsk(rL3("Ban_phai_dong_File") & Space(1) & fileName.Substring(fileName.LastIndexOf("\") + 1) & Space(1) & rL3("truoc_khi_xuat_Excel") & "." & vbCrLf & rL3("Ban_co_muon_dong_khong")) = Windows.Forms.DialogResult.Yes) Then
                         p.Kill()
                         Return True
                     Else
@@ -2105,22 +2744,23 @@ ErrorOpenFile:
 
     Private Sub ExportSubTotals(ByVal sfileName As String, ByVal iUsedCol As Integer)
         Try
-            If Not AllowExportSubTotals() Then
-                Me.Cursor = Cursors.Default
-                btnExport.Enabled = True
-                Exit Sub
-            End If
+            'Chuyển qua kiểm tra AllowExport
+            'If Not AllowExportSubTotals() Then
+            '    Me.Cursor = Cursors.Default
+            '    btnExport.Enabled = True
+            '    Exit Sub
+            'End If
 
             'Set lại Index cho Group và Sum cho cột số
             Dim iCountGroup As Integer = tdbgGroup.RowCount
             Dim arrGroupColumns(iCountGroup - 1) As Integer
-            Dim arrFunction(iCountGroup - 1) As Microsoft.Office.Interop.Excel.XlConsolidationFunction
-            Dim WSheet As New Excel.Worksheet
+            Dim arrFunction(iCountGroup - 1) As Integer 'Microsoft.Office.Interop.Excel.XlConsolidationFunction
+            Dim WSheet As New Object 'Excel.Worksheet
 
             EXL.Workbooks.Open(sfileName)
-            WSheet = CType(EXL.Workbooks.Item(1).ActiveSheet, Excel.Worksheet)
+            WSheet = EXL.Workbooks.Item(1).ActiveSheet 'CType(EXL.Workbooks.Item(1).ActiveSheet, Excel.Worksheet)
 
-            Dim range(iCountGroup - 1) As Excel.Range
+            Dim range(iCountGroup - 1) As Object 'Excel.Range
             Dim sAreaMax As String = GetAreaMaxData(iUsedCol + 10, dtExportTmp.Rows.Count + 50)
             Dim sAreaMin As String = tdbcColExcel.Text & txtRow.Text
             'Minh Hòa Update 28/08/2010
@@ -2141,9 +2781,9 @@ ErrorOpenFile:
                 Dim dr() As DataRow = dtSubTotals.Select("GroupFieldName = " & SQLString(tdbgGroup(j, COL1_GroupFieldName)) & " And FieldName <> ''")
                 Dim arrSumCount(dr.Length - 1) As Integer
                 If dr(0).Item("ExcelFunction").ToString = "1" Then 'Count
-                    arrFunction(j) = Excel.XlConsolidationFunction.xlCount
+                    arrFunction(j) = -4112                    'Excel.XlConsolidationFunction.xlCount
                 Else 'Sum
-                    arrFunction(j) = Excel.XlConsolidationFunction.xlSum
+                    arrFunction(j) = -4157                    'Excel.XlConsolidationFunction.xlSum
                 End If
                 'Xác định Group và tập SumCount
                 For i As Integer = 0 To tdbg.RowCount - 1
@@ -2168,7 +2808,7 @@ ErrorOpenFile:
                     End If
                 Next
                 range(j) = WSheet.Range(sAreaMin, sAreaMax)
-                range(j).Subtotal(L3Int(arrGroupColumns(j)), arrFunction(j), arrSumCount, Nothing, , Excel.XlSummaryRow.xlSummaryBelow)
+                range(j).Subtotal(L3Int(arrGroupColumns(j)), arrFunction(j), arrSumCount, Nothing, , 1) 'Excel.XlSummaryRow.xlSummaryBelow)
 
             Next
 
@@ -2233,23 +2873,24 @@ ErrorOpenFile:
     End Sub
 
     Private Sub ExportPivotTable(ByVal sfileName As String, ByVal iUsedCol As Integer)
-        If Not AllowExportPivotTable() Then
-            Me.Cursor = Cursors.Default
-            btnExport.Enabled = True
-            Exit Sub
-        End If
-        Dim xlSourceSheet As New Excel.Worksheet
-        Dim xlPivotSheet As New Excel.Worksheet
-        Dim rowField(tdbgRow.RowCount - 1) As Excel.PivotField
-        Dim colField(tdbgColumn.RowCount - 1) As Excel.PivotField
-        Dim pivotTable As Excel.PivotTable
+        'Chuyển qua kiểm tra AllowExport
+        'If Not AllowExportPivotTable() Then
+        '    Me.Cursor = Cursors.Default
+        '    btnExport.Enabled = True
+        '    Exit Sub
+        'End If
+        Dim xlSourceSheet As New Object 'Excel.Worksheet
+        Dim xlPivotSheet As New Object 'Excel.Worksheet
+        Dim rowField(tdbgRow.RowCount - 1) As Object 'Excel.PivotField
+        Dim colField(tdbgColumn.RowCount - 1) As Object 'Excel.PivotField
+        Dim pivotTable As Object 'Excel.PivotTable
         'Update 28/08/2010
-        Dim book As Excel.Workbook
+        Dim book As Object 'Excel.Workbook
 
         Try
             book = EXL.Workbooks.Open(sfileName)
-            xlSourceSheet = CType(EXL.Workbooks.Item(1).Sheets.Item(iSheetData), Excel.Worksheet)
-            xlPivotSheet = CType(EXL.Workbooks.Item(1).Sheets.Item(iSheetPivot), Excel.Worksheet)
+            xlSourceSheet = EXL.Workbooks.Item(1).Sheets.Item(iSheetData) 'CType(EXL.Workbooks.Item(1).Sheets.Item(iSheetData), Excel.Worksheet)
+            xlPivotSheet = EXL.Workbooks.Item(1).Sheets.Item(iSheetPivot) ' CType(EXL.Workbooks.Item(1).Sheets.Item(iSheetPivot), Excel.Worksheet)
             xlPivotSheet.Select() 'Hiển thị mặc định SheetPivot 
 
             Dim sAreaMax As String = GetAreaMaxData(iUsedCol, dtExportTmp.Rows.Count)
@@ -2260,36 +2901,36 @@ ErrorOpenFile:
                 sAreaMin = tdbcColExcel.Text & (Integer.Parse(txtRow.Text) + 3).ToString
             End If
 
-            EXL.ActiveWorkbook.PivotCaches.Add(Excel.XlPivotTableSourceType.xlDatabase, xlSourceSheet.Range(sAreaMin & ":" & sAreaMax)).CreatePivotTable(xlPivotSheet.Range(sAreaMin), TableName:="PivotTable2")
-            pivotTable = CType(xlPivotSheet.PivotTables("PivotTable2"), Excel.PivotTable)
+            EXL.ActiveWorkbook.PivotCaches.Add(1, xlSourceSheet.Range(sAreaMin & ":" & sAreaMax)).CreatePivotTable(xlPivotSheet.Range(sAreaMin), TableName:="PivotTable2") 'EXL.ActiveWorkbook.PivotCaches.Add(Excel.XlPivotTableSourceType.xlDatabase, xlSourceSheet.Range(sAreaMin & ":" & sAreaMax)).CreatePivotTable(xlPivotSheet.Range(sAreaMin), TableName:="PivotTable2")
+            pivotTable = xlPivotSheet.PivotTables("PivotTable2") 'CType(xlPivotSheet.PivotTables("PivotTable2"), Excel.PivotTable)
 
-            'Update 11/06/2010: Đọan code của lưới tdbgData phải đặt trước đọan code lưới tdbgRow và lưới tdbgColumn
-            Dim sFieldNameDesc As String
-            For i As Integer = 0 To tdbgData.RowCount - 1
-                If _useUnicode Then
-                    sFieldNameDesc = tdbgData(i, COL5_FieldNameDesc).ToString
-                Else
-                    sFieldNameDesc = ConvertVniToUnicode(tdbgData(i, COL5_FieldNameDesc).ToString)
-                End If
+            ' ''Update 11/06/2010: Đọan code của lưới tdbgData phải đặt trước đọan code lưới tdbgRow và lưới tdbgColumn
+            'Dim sFieldNameDesc As String
+            'For i As Integer = 0 To tdbgData.RowCount - 1
+            '    If _useUnicode Then
+            '        sFieldNameDesc = tdbgData(i, COL5_FieldNameDesc).ToString
+            '    Else
+            '        sFieldNameDesc = ConvertVniToUnicode(tdbgData(i, COL5_FieldNameDesc).ToString)
+            '    End If
 
-                If tdbgData(i, COL5_ExcelFunction).ToString = "1" Then 'Count
-                    pivotTable.AddDataField(pivotTable.PivotFields(sFieldNameDesc), "Count of" & Space(1) & sFieldNameDesc, Excel.XlConsolidationFunction.xlCount)
-                Else 'Sum
-                    pivotTable.AddDataField(pivotTable.PivotFields(sFieldNameDesc), "Sum of" & Space(1) & sFieldNameDesc, Excel.XlConsolidationFunction.xlSum)
-                End If
-            Next
-
+            '    If tdbgData(i, COL5_ExcelFunction).ToString = "1" Then 'Count
+            '        pivotTable.AddDataField(pivotTable.PivotFields(sFieldNameDesc), "Count of" & Space(1) & sFieldNameDesc, Excel.XlConsolidationFunction.xlCount)
+            '    Else 'Sum
+            '        pivotTable.AddDataField(pivotTable.PivotFields(sFieldNameDesc), "Sum of" & Space(1) & sFieldNameDesc, Excel.XlConsolidationFunction.xlSum)
+            '    End If
+            'Next
             For i As Integer = 0 To tdbgRow.RowCount - 1
                 If _useUnicode Then
-                    rowField(i) = CType(pivotTable.PivotFields(tdbgRow(i, COL4_FieldNameDesc).ToString), Excel.PivotField)
+                    rowField(i) = pivotTable.PivotFields(tdbgRow(i, COL4_FieldNameDesc).ToString) 'CType(pivotTable.PivotFields(tdbgRow(i, COL4_FieldNameDesc).ToString), Excel.PivotField)
                 Else
-                    rowField(i) = CType(pivotTable.PivotFields(ConvertVniToUnicode(tdbgRow(i, COL4_FieldNameDesc).ToString)), Excel.PivotField)
+                    rowField(i) = pivotTable.PivotFields(ConvertVniToUnicode(tdbgRow(i, COL4_FieldNameDesc).ToString)) 'CType(pivotTable.PivotFields(ConvertVniToUnicode(tdbgRow(i, COL4_FieldNameDesc).ToString)), Excel.PivotField)
                 End If
 
-                rowField(i).Orientation = Excel.XlPivotFieldOrientation.xlRowField
+                rowField(i).Orientation = 1 'Excel.XlPivotFieldOrientation.xlRowField
                 If chkSubTotalsRow.Checked = False Then
                     If rowField(i).Subtotals IsNot Nothing Then
                         Dim bSubtotals As Boolean() = {False, False, False, False, False, False, False, False, False, False, False, False}
+                        '  Dim bSubtotals As Boolean() = {True, True, True, True, True, True, True, True, True, True, True, True}
                         rowField(i).Subtotals = bSubtotals
                     End If
                 End If
@@ -2297,20 +2938,47 @@ ErrorOpenFile:
 
             For i As Integer = 0 To tdbgColumn.RowCount - 1
                 If _useUnicode Then
-                    colField(i) = CType(pivotTable.PivotFields(tdbgColumn(i, COL3_FieldNameDesc).ToString), Excel.PivotField)
+                    colField(i) = pivotTable.PivotFields(tdbgColumn(i, COL3_FieldNameDesc).ToString) 'CType(pivotTable.PivotFields(tdbgColumn(i, COL3_FieldNameDesc).ToString), Excel.PivotField)
                 Else
-                    colField(i) = CType(pivotTable.PivotFields(ConvertVniToUnicode(tdbgColumn(i, COL3_FieldNameDesc).ToString)), Excel.PivotField)
+                    colField(i) = pivotTable.PivotFields(ConvertVniToUnicode(tdbgColumn(i, COL3_FieldNameDesc).ToString)) 'CType(pivotTable.PivotFields(ConvertVniToUnicode(tdbgColumn(i, COL3_FieldNameDesc).ToString)), Excel.PivotField)
                 End If
 
-                colField(i).Orientation = Excel.XlPivotFieldOrientation.xlColumnField
+                colField(i).Orientation = 2 'Excel.XlPivotFieldOrientation.xlColumnField
                 If chkSubTotalsCol.Checked = False Then
                     If colField(i).Subtotals IsNot Nothing Then
+                        'Dim bSubtotals As Boolean() = {True, True, True, True, True, True, True, True, True, True, True, True}
                         Dim bSubtotals As Boolean() = {False, False, False, False, False, False, False, False, False, False, False, False}
                         colField(i).Subtotals = bSubtotals
                     End If
                 End If
             Next
-
+            '  Update 21/03/2016: chuyển xuống cùng vì Sum data không theo dòng theo Incident 85366
+            Dim sFieldNameDesc As String
+            For i As Integer = 0 To tdbgData.RowCount - 1
+                If _useUnicode Then
+                    sFieldNameDesc = tdbgData(i, COL5_FieldNameDesc).ToString
+                Else
+                    sFieldNameDesc = ConvertVniToUnicode(tdbgData(i, COL5_FieldNameDesc).ToString)
+                End If
+                Dim pivotField As Object = pivotTable.PivotFields(sFieldNameDesc) 'Excel.PivotField = pivotTable.PivotFields(sFieldNameDesc)
+                With pivotField
+                    .Orientation = 4 'Excel.XlPivotFieldOrientation.xlDataField
+                    If tdbgData(i, COL5_ExcelFunction).ToString = "1" Then 'Count
+                        .Function = -4112                        ' Excel.XlConsolidationFunction.xlCount
+                        .Name = "Count of" & Space(1) & sFieldNameDesc
+                    Else
+                        .Function = -4157                        'Excel.XlConsolidationFunction.xlSum
+                        .Name = "Sum of" & Space(1) & sFieldNameDesc
+                    End If
+                    .Position = i + 1
+                End With
+                'If tdbgData(i, COL5_ExcelFunction).ToString = "1" Then 'Count
+                '    pivotTable.AddDataField(pivotTable.PivotFields(sFieldNameDesc), "Count of" & Space(1) & sFieldNameDesc, Excel.XlConsolidationFunction.xlCount)
+                'Else 'Sum
+                '    pivotTable.AddDataField(pivotTable.PivotFields(sFieldNameDesc), "Sum of" & Space(1) & sFieldNameDesc, Excel.XlConsolidationFunction.xlSum)
+                'End If
+            Next
+            If tdbgData.RowCount > 1 Then pivotTable.DataPivotField.Orientation = 2 ' Excel.XlPivotFieldOrientation.xlColumnField
             'Minh Hòa Update 28/08/2010
             ProcessOptions(book, xlPivotSheet, iUsedCol)
 
@@ -2325,27 +2993,46 @@ ErrorOpenFile:
             MessageBox.Show(ex.Message, "Error: Export Pivot Table")
             CloseProcessWindow(sfileName, False)
         End Try
+
     End Sub
 
     Private Sub MsgErrorExcel(ByVal sMessage As String)
-        If txtPath.Text.Trim <> "" Then
+        If txtPathIn.Text.Trim <> "" Then
             Dim SplitArray() As String
-            SplitArray = Microsoft.VisualBasic.Split(txtPath.Text, "\")
-            D99C0008.MsgL3(r("Ban_phai_dong_File") & " " & SplitArray(SplitArray.Length - 1) & " " & r("truoc_khi_xuat_Excel"))
+            SplitArray = Microsoft.VisualBasic.Split(txtPathIn.Text, "\")
+            D99C0008.MsgL3(rL3("Ban_phai_dong_File") & " " & SplitArray(SplitArray.Length - 1) & " " & rL3("truoc_khi_xuat_Excel"))
         Else
-            D99C0008.MsgL3(r("Ban_phai_dong_File_Dataxls_truoc_khi_xuat_Excel"))
+            D99C0008.MsgL3(rL3("Ban_phai_dong_File_Dataxls_truoc_khi_xuat_Excel"))
         End If
     End Sub
 
-    Private Sub btnChoosePath_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnChoosePath.Click
+    Private Sub btnChoosePathIn_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnChoosePathIn.Click
         Dim file As New OpenFileDialog
-        file.Filter = "Excel File (*.xls)|*.xls"
+        file.Filter = "Excel Files|*.xls;*.xlsx"
         If (file.ShowDialog() = Windows.Forms.DialogResult.OK) Then
-            txtPath.Text = file.FileName
+            txtPathIn.Text = file.FileName
             cboDefaultSheet.Enabled = True
         End If
-        GetNameSheets()
+        txtPathIn_Validated(Nothing, Nothing)
     End Sub
+
+    Private Sub btnChoosePathOut_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnChoosePathOut.Click
+        Dim sFolder As New FolderBrowserDialog
+        sFolder.Description = "Chọn thư mục chứa file xuất excel"
+        If txtPathOut.Text <> "" Then
+            sFolder.SelectedPath = txtPathOut.Text
+        Else
+            sFolder.SelectedPath = DEFAULT_PATH_OUT
+        End If
+        sFolder.ShowNewFolderButton = True
+        If sFolder.ShowDialog = Windows.Forms.DialogResult.OK Then
+            txtPathOut.Text = sFolder.SelectedPath
+        End If
+        sFolder.Dispose()
+        chkIsMarkTimer.Enabled = txtPathIn.Text.Trim <> "" 'AndAlso txtPathOut.Text.Trim() <> ""
+        txtPathOut_Validated(Nothing, Nothing)
+    End Sub
+
 
     Private Function CheckInputCode(ByVal sCode As String) As Boolean
         Dim sStringInput As String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -2354,15 +3041,16 @@ ErrorOpenFile:
     End Function
 
     Private Function AllowSave() As Boolean
+        If Not CheckPath() Then Return False 'Kiểm tra thư mục hợp lệ
         If txtExcelTemplateID.Visible = True Then
             If txtExcelTemplateID.Text.Trim = "" Then
-                D99C0008.MsgNotYetEnter(r("Mau_xuat_Excel"))
+                D99C0008.MsgNotYetEnter(rL3("Mau_xuat_Excel"))
                 tabMain.SelectedTab = TabInfo
                 txtExcelTemplateID.Focus()
                 Return False
             Else
                 If Not CheckInputCode(txtExcelTemplateID.Text) Then
-                    D99C0008.MsgL3(r("Mau_xuat_Excel") & Space(1) & r("khong_hop_le"))
+                    D99C0008.MsgL3(rL3("Mau_xuat_Excel") & Space(1) & rL3("khong_hop_le"))
                     tabMain.SelectedTab = TabInfo
                     txtExcelTemplateID.Focus()
                     Return False
@@ -2382,7 +3070,7 @@ ErrorOpenFile:
             End If
         Else
             If tdbcExcelTemplateID.Text.Trim = "" Then
-                D99C0008.MsgNotYetEnter(r("Mau_xuat_Excel"))
+                D99C0008.MsgNotYetEnter(rL3("Mau_xuat_Excel"))
                 tabMain.SelectedTab = TabInfo
                 tdbcExcelTemplateID.Focus()
                 Return False
@@ -2410,14 +3098,44 @@ ErrorOpenFile:
         Return True
     End Function
 
-    Private Sub btnSave_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSave.Click
+    Private Sub btnNotSave_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnNotSave.Click
+        If AskMsgBeforeRowChange() Then
+            If Not SaveData(sender) Then Exit Sub
+        Else
+            LoadTDBCombo()
+            If Not bCheckD91T2021 Then
+                btnDelete.Enabled = False
+                tdbcExcelTemplateID.Visible = False
+                txtExcelTemplateID.Visible = True
+                txtExcelTemplateID.Enabled = True
+                txtExcelTemplateID.Text = ""
+                _FormState = EnumFormState.FormAdd
+                'Update 07/07/2010: Thêm mới thì Check, Sửa thì UnCheck
+                chkShowAll.Checked = True
+
+                LoadGrid()
+                btnDelete.Enabled = False
+            Else
+                txtExcelTemplateID.Visible = False
+                tdbcExcelTemplateID.Visible = True
+
+                'Update 07/07/2010: Thêm mới thì Check, Sửa thì UnCheck
+                chkShowAll.Checked = False
+                tdbcExcelTemplateID.SelectedIndex = 1
+                btnDelete.Enabled = True
+                _FormState = EnumFormState.FormEdit
+            End If
+            btnSave.Enabled = True
+        End If
+    End Sub
+
+    Private Function SaveData(ByVal sender As System.Object) As Boolean
         tdbgSubTotals.UpdateData()
         tdbgColumn.UpdateData()
         tdbgRow.UpdateData()
         tdbgData.UpdateData()
 
-        If AskSave() = Windows.Forms.DialogResult.No Then Exit Sub
-        If Not AllowSave() Then Exit Sub
+        If Not AllowSave() Then Exit Function
 
         btnSave.Enabled = False
         btnClose.Enabled = False
@@ -2462,6 +3180,17 @@ ErrorOpenFile:
             btnClose.Enabled = True
             btnSave.Enabled = True
         End If
+    End Function
+
+    Private Sub btnSave_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSave.Click
+        btnSave.Focus()
+        If btnSave.Focused = False Then Exit Sub
+        'Hỏi trước khi lưu
+        If AskSave() = Windows.Forms.DialogResult.No Then
+            ' SetReturnFormView()
+            Exit Sub
+        End If
+        SaveData(sender)
     End Sub
 
     Private Sub btnDelete_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnDelete.Click
@@ -2510,22 +3239,22 @@ ErrorOpenFile:
         e.Handled = CheckKeyPress(e.KeyChar, EnumKey.Number)
     End Sub
 
-    Private Sub txtPath_LostFocus(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtPath.LostFocus
-        cboDefaultSheet.Enabled = Not (txtPath.Text.Trim = "")
-        If txtPath.Text.Trim = "" Then
-            cboDefaultSheet.Enabled = False
-            cboDefaultSheet.Text = ""
-            cboDefaultSheet.Items.Clear()
-        Else
-            cboDefaultSheet.Enabled = True
-            If My.Computer.FileSystem.FileExists(txtPath.Text) = True Then
-                GetNameSheets()
-            Else
-                cboDefaultSheet.Items.Clear()
-                cboDefaultSheet.Text = ""
-            End If
-        End If
-    End Sub
+    'Private Sub txtPath_LostFocus(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtPath.LostFocus
+    '    cboDefaultSheet.Enabled = Not (txtPath.Text.Trim = "")
+    '    If txtPath.Text.Trim = "" Then
+    '        cboDefaultSheet.Enabled = False
+    '        cboDefaultSheet.Text = ""
+    '        cboDefaultSheet.Items.Clear()
+    '    Else
+    '        cboDefaultSheet.Enabled = True
+    '        If My.Computer.FileSystem.FileExists(txtPath.Text) = True Then
+    '            GetNameSheets()
+    '        Else
+    '            cboDefaultSheet.Items.Clear()
+    '            cboDefaultSheet.Text = ""
+    '        End If
+    '    End If
+    'End Sub
 
     Private Sub btnUp_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnUp.Click
         If tdbg.Row > 0 Then
@@ -2541,10 +3270,10 @@ ErrorOpenFile:
         End If
     End Sub
 
-    Private Sub chkConvertUnicode_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles chkConvertUnicode.Click
-        dtExportTmp = Nothing
-        chkConvertUnicode.Tag = False
-    End Sub
+    'Private Sub chkConvertUnicode_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+    '    dtExportTmp = Nothing
+    '    chkConvertUnicode.Tag = False
+    'End Sub
 
 #End Region
 
@@ -2554,7 +3283,7 @@ ErrorOpenFile:
         Dim sSQL As String = ""
         sSQL &= "Exec D91P2020 "
         sSQL &= SQLString(sFormName.Substring(1, 2)) & COMMA 'ModuleID, varchar, NOT NULL
-        sSQL &= SQLString("(" & _FormID & ")") & COMMA 'FormID, varchar[10], NOT NULL
+        sSQL &= SQLString("(" & _formID & ")") & COMMA 'FormID, varchar[10], NOT NULL
         'Design By Thanh Phương 16/07/2009
         'Trong trường hợp thêm mới truyền ExcelTemplateID = '%' để đổ ra hết dữ liệu
         If _FormState = EnumFormState.FormAdd Then
@@ -2577,12 +3306,12 @@ ErrorOpenFile:
                 sSQL.AppendLine("IsUnicode, DisplayColumn, DisplayRow, Path, ")
                 sSQL.AppendLine("SheetExcel, ShowColTitle, IsExportType, ExportType, ")
                 sSQL.AppendLine("SubtotalRow, SubtotalColumn, GrandTotalRow, GrandTotalColumn, Title, TitleU, ")
-                sSQL.AppendLine("CheckValue, UnCheckValue, PageOrientation, PagePercent, PageSize")
+                sSQL.AppendLine("CheckValue, UnCheckValue, PageOrientation, PagePercent, PageSize, IsAutoSizeColumn,IsMarkTimer,PathOut, IsNoFormula,ShowTotalRow ")
                 sSQL.AppendLine(") Values(")
                 sSQL.Append(SQLNumber(i + 1) & COMMA) 'OrderNum, int, NOT NULL
                 If _useUnicode Then
                     sSQL.Append("''" & COMMA) 'FieldName, varchar[50], NOT NULL
-                    sSQL.Append(SQLString(tdbg(i, COL_FieldName).ToString) & COMMA) 'FieldNameU, varchar[50], NOT NULL
+                    sSQL.Append(SQLStringUnicode(tdbg(i, COL_FieldName).ToString, True, True) & COMMA) 'FieldNameU, varchar[50], NOT NULL
                 Else
                     sSQL.Append(SQLString(tdbg(i, COL_FieldName).ToString) & COMMA) 'FieldName, varchar[50], NOT NULL
                     sSQL.Append("''" & COMMA) 'FieldNameU, varchar[50], NOT NULL
@@ -2595,10 +3324,11 @@ ErrorOpenFile:
                     sSQL.Append(SQLString(tdbcExcelTemplateID.Text) & COMMA) 'ExcelTemplateID, varchar[50], NOT NULL
                 End If
                 sSQL.Append(SQLNumber(tdbg(i, COL_NumberFormat).ToString) & COMMA & vbCrLf) 'NumberFormat, tinyint, NOT NULL
-                sSQL.Append(SQLNumber(chkConvertUnicode.Checked) & COMMA) 'IsUnicode, tinyint, NOT NULL
+                ' sSQL.Append(SQLNumber(chkConvertUnicode.Checked) & COMMA) 'IsUnicode, tinyint, NOT NULL
+                sSQL.Append(SQLNumber(1) & COMMA) 'IsUnicode, tinyint, NOT NULL
                 sSQL.Append(SQLString(tdbcColExcel.Text) & COMMA) 'DisplayColumn, varchar[20], NOT NULL
                 sSQL.Append(SQLNumber(txtRow.Text) & COMMA) 'DisplayRow, int, NOT NULL
-                sSQL.Append(SQLString(txtPath.Text) & COMMA) 'Path, varchar[500], NOT NULL
+                sSQL.Append(SQLString(txtPathIn.Text) & COMMA) 'Path, varchar[500], NOT NULL
                 sSQL.Append(SQLString(cboDefaultSheet.Text) & COMMA) 'SheetExcel, varchar[100], NOT NULL
                 sSQL.Append(SQLNumber(chkDisplayTitle.Checked) & COMMA) 'ShowColTitle, tinyint, NOT NULL
                 sSQL.Append(SQLNumber(chkIsExportType.Checked) & COMMA) 'IsExportType, tinyint, NOT NULL
@@ -2618,8 +3348,12 @@ ErrorOpenFile:
                 sSQL.Append(SQLString(txtUnChecked.Text) & COMMA)
                 sSQL.Append(SQLNumber(optLandscape.Checked) & COMMA)
                 sSQL.Append(SQLNumber(dudAdjust.Text) & COMMA)
-                sSQL.Append(SQLString(cboPageSize.Text))
-
+                sSQL.Append(SQLString(cboPageSize.Text) & COMMA)
+                sSQL.Append(SQLNumber(chkIsAutoSizeColumn.Checked) & COMMA) 'IsAutoSizeColumn, tinyint, NOT NULL
+                sSQL.Append(SQLNumber(chkIsMarkTimer.Checked) & COMMA) 'IsMarkTimer, tinyint, NOT NULL
+                sSQL.Append(SQLString(txtPathOut.Text) & COMMA)
+                sSQL.Append(SQLNumber(chkIsNoFormula.Checked) & COMMA)
+                sSQL.Append(SQLNumber(chkShowSum.Checked))
                 sSQL.Append(")")
 
                 sRet.Append(sSQL.ToString & vbCrLf)
@@ -2670,7 +3404,7 @@ ErrorOpenFile:
                     sSQL.Append("''" & COMMA) 'GroupFieldName, varchar[50], NOT NULL
                     sSQL.Append(SQLString(dr1("GroupFieldName").ToString) & COMMA) 'GroupFieldNameU, varchar[50], NOT NULL
                     sSQL.Append("''" & COMMA) 'FieldName, varchar[50], NOT NULL
-                    sSQL.Append(SQLString(dr1("FieldName").ToString) & COMMA) 'FieldNameU, varchar[50], NOT NULL
+                    sSQL.Append(SQLStringUnicode(dr1("FieldName").ToString, True, True) & COMMA) 'FieldNameU, varchar[50], NOT NULL
                 Else
                     sSQL.Append(SQLString(dr1("GroupFieldName").ToString) & COMMA) 'GroupFieldName, varchar[50], NOT NULL
                     sSQL.Append("''" & COMMA) 'GroupFieldNameU, varchar[50], NOT NULL
@@ -3115,7 +3849,7 @@ ErrorOpenFile:
     ''' <remarks></remarks>
     Private Sub GetFormName()
         Dim barr As Boolean = False
-        sFormName = _FormID.Trim
+        sFormName = _formID.Trim
         'Kiểm tra xem có phải là chuỗi giá trị hay không
         barr = sFormName.Contains(",")
         If barr = True Then 'Nếu là chuỗi thì cắt lấy giá trị đầu tiên
@@ -3123,8 +3857,8 @@ ErrorOpenFile:
             sFormName = sFormName.Trim.Substring(1) 'Cắt dấu nháy đầu tiền
             sFormName = sFormName.Substring(0, sFormName.IndexOf("'")) 'Cắt dấu nháy cuối
         Else
-            sFormName = _FormID.Trim
-            _FormID = "'" & _FormID & "'" ' Nếu truyền vào 1 Form thì truyền thêm 2 dấu nháy (đầu và cuối)
+            sFormName = _formID.Trim
+            _formID = "'" & _formID & "'" ' Nếu truyền vào 1 Form thì truyền thêm 2 dấu nháy (đầu và cuối)
         End If
     End Sub
 
@@ -3136,12 +3870,12 @@ ErrorOpenFile:
             If L3Bool(tdbg(i, COL_IsUsed)) = True Then
                 iCount += 1
                 'Update 16/10/2009
-                If chkConvertUnicode.Checked Then ' Chuyển Unicode
-                    If tdbg(i, COL_DataType).ToString.Trim = "S" Then
-                        arrDisabledColumn.Add(tdbg(i, COL_FieldName))
-                        bUnicode = True
-                    End If
+                ' If chkConvertUnicode.Checked Then ' Chuyển Unicode
+                If tdbg(i, COL_DataType).ToString.Trim = "S" Then
+                    arrDisabledColumn.Add(tdbg(i, COL_FieldName))
+                    bUnicode = True
                 End If
+                ' End If
             End If
         Next
         Return iCount
@@ -3154,39 +3888,59 @@ ErrorOpenFile:
         Else
             iRowStart = L3Int(txtRow.Text) - 1
         End If
+
         Using g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
+            Dim iMaxLenght As Integer
             Dim r As Integer, c As Integer
             For c = 0 To sheet.Columns.Count - 1
+                If dicFormula.ContainsKey(c.ToString) Then Continue For 'Bổ sung Auto Size cho cột công thức
+                iMaxLenght = 0
                 Dim colWidth As Integer = -1
                 'For r = 0 To sheet.Rows.Count - 1
                 For r = iRowStart To sheet.Rows.Count - 1
                     Dim value As Object = sheet(r, c).Value
-                    If Not (value Is Nothing) Then
+                    If L3String(value) <> "" Then
+                        If iMaxLenght < L3String(value).Length Then iMaxLenght = L3String(value).Length
                         ' get value (unformatted at this point)
                         ' get font (default or style)
                         Dim font As Font = C1XLBook1.DefaultFont
                         Dim s As XLStyle = sheet(r, c).Style
+
                         If Not (s Is Nothing) Then
                             If Not (s.Font Is Nothing) Then
                                 font = s.Font
                             End If
                         End If
+                        If s IsNot Nothing Then
+                            'Update 18/06/2015
+                            If s.AlignHorz = XLAlignHorzEnum.Right Then 'Neu la So thi lay them chieu dai cua Format
+                                Try
+                                    If s.Format IsNot Nothing AndAlso s.Format <> "" Then value = Format(value, s.Format)
+                                Catch ex As Exception
+
+                                End Try
+
+                            End If
+                        End If
+                       
+
                         ' measure string (add a little tolerance)
                         Dim sz As Size
                         If Not IsDBNull(value) Then
-                            sz = System.Drawing.Size.Ceiling(g.MeasureString(CStr(value) + "XX", font))
+                            sz = System.Drawing.Size.Ceiling(g.MeasureString(L3String(value) + "XX", font))
                         End If
+
                         ' keep widest so far
-                        If sz.Width > colWidth Then
-                            colWidth = sz.Width
-                        End If
+                        If sz.Width > colWidth Then colWidth = sz.Width
+
                     End If
                     ' done measuring, set column width
-                    If colWidth > -1 Then
-                        sheet.Columns(c).Width = C1XLBook.PixelsToTwips(colWidth)
-                    End If
+                    If colWidth > -1 Then sheet.Columns(c).Width = C1XLBook.PixelsToTwips(colWidth) + 10 * iMaxLenght 'Công thêm sai số do sử dụng Tiếng Việt
+                    sheet.Columns(c).Width += 100 'Cộng thêm 100
                 Next
+
             Next
+
         End Using
     End Sub
 
@@ -3215,21 +3969,31 @@ ErrorOpenFile:
         Return sSort
     End Function
 
-    Private Sub GetNameSheets()
+    Private Function GetNameSheets() As Boolean
+
         Dim workbook As C1XLBook = New C1XLBook()
         Dim i As Integer = 0
         cboDefaultSheet.Items.Clear()
-        If txtPath.Text.Trim <> "" Then
-            If My.Computer.FileSystem.FileExists(txtPath.Text) = False Then
+        If txtPathIn.Text.Trim <> "" Then
+
+            If My.Computer.FileSystem.FileExists(txtPathIn.Text) = False Then
                 If gsLanguage = "84" Then
-                    D99C0008.MsgL3("Không tồn tại file Excel:" & Space(1) & txtPath.Text & vbCrLf)
+                    D99C0008.MsgL3("Không tồn tại file Excel:" & Space(1) & txtPathIn.Text & vbCrLf)
                 Else
-                    D99C0008.MsgL3("Not exist file Excel:" & Space(1) & txtPath.Text & vbCrLf)
+                    D99C0008.MsgL3("Not exist file Excel:" & Space(1) & txtPathIn.Text & vbCrLf)
                 End If
-                txtPath.Text = ""
-                Exit Sub
+                txtPathIn.Text = ""
+                txtPathIn.Tag = ""
+                txtPathIn_Validated(Nothing, Nothing)
+                Return False
             Else
-                workbook.Load(txtPath.Text)
+                Try
+                    workbook.Load(txtPathIn.Text)
+                Catch ex As Exception
+                    D99C0008.MsgL3("File xuất không đúng định dạng.")
+                    Return False
+                End Try
+
             End If
             'Get names of all sheets in the workbook
             For i = 0 To workbook.Sheets.Count - 1
@@ -3237,24 +4001,9 @@ ErrorOpenFile:
             Next
             cboDefaultSheet.SelectedIndex = 0
         End If
-    End Sub
-
-    Private Function GetIntColumnExcel(ByVal sColumn As String) As Integer
-        If sColumn.Length = 1 Then
-
-            Return (Asc(sColumn) - Asc("A"))
-        Else
-            Return (Asc(sColumn.Substring(0, 1)) - Asc("A") + 1) * 26 + (Asc(sColumn.Substring(1, 1)) - Asc("A"))
-        End If
-
-    End Function
-
-    Private Function GetStringColumnExcel(ByVal sColumn As Integer) As String
-        If sColumn <= 25 Then
-            Return Chr(sColumn + Asc("A"))
-        Else
-            Return (Chr(sColumn \ 26 + Asc("A") - 1) + Chr(sColumn Mod 26 + Asc("A"))).ToString
-        End If
+        workbook = Nothing
+        GC.Collect()
+        Return True
     End Function
 
     Private Function GetAreaMaxData(ByVal iColUsed As Integer, ByVal iRowUsed As Integer) As String
@@ -3331,13 +4080,21 @@ ErrorOpenFile:
                     sheet.PrintSettings.PaperKind = Printing.PaperKind.A4
             End Select
         End If
+        '****************Bổ sung ngày 15/08/2017 theo 101278 
+        sheet.PrintSettings.MarginBottom = 0.75
+        sheet.PrintSettings.MarginTop = 0.75
+        sheet.PrintSettings.MarginLeft = 0.7
+        sheet.PrintSettings.MarginRight = 0.7
+        sheet.PrintSettings.MarginHeader = 0.3
+        sheet.PrintSettings.MarginFooter = 0.3
+        '************
     End Sub
 
-    Private Sub ProcessOptions(ByRef book As Excel.Workbook, ByRef sheet As Excel.Worksheet, ByVal ColUse As Integer)
+    Private Sub ProcessOptions(ByRef book As Object, ByRef sheet As Object, ByVal ColUse As Integer) '(ByRef book As Excel.Workbook, ByRef sheet As Excel.Worksheet, ByVal ColUse As Integer)
         If txtTitle.Text.Trim <> "" Then
 
             'Merge Cells
-            Dim cellTitle As Excel.Range
+            Dim cellTitle As Object 'Excel.Range
             Dim iColCount As Integer
             Dim sColEnd As String
 
@@ -3360,7 +4117,7 @@ ErrorOpenFile:
             With cellTitle
                 .MergeCells = True
                 .Value = IIf(txtTitle.Font.Name = "Lemon3", ConvertVniToUnicode(txtTitle.Text.ToUpper), txtTitle.Text.ToUpper)
-                .HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter
+                .HorizontalAlignment = -4108                'Excel.XlHAlign.xlHAlignCenter
                 '.Interior.ColorIndex = 36 ' Set mau nen neu can
                 .Font.Color = 16711680 'Blue
                 .Font.Bold = True
@@ -3372,9 +4129,9 @@ ErrorOpenFile:
 
         ' Giay ngang/ doc 
         If optLandscape.Checked Then
-            sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlLandscape
+            sheet.PageSetup.Orientation = 2 ' Excel.XlPageOrientation.xlLandscape
         Else
-            sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlPortrait
+            sheet.PageSetup.Orientation = 1 'Excel.XlPageOrientation.xlPortrait
         End If
 
         ' Zoom %
@@ -3385,19 +4142,19 @@ ErrorOpenFile:
         If cboPageSize.Text <> "" Then
             Select Case cboPageSize.Text
                 Case "Letter"
-                    sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperLetter
+                    sheet.PageSetup.PaperSize = 1 ' Excel.XlPaperSize.xlPaperLetter
                 Case "Legal"
-                    sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperLegal
+                    sheet.PageSetup.PaperSize = 5 'Excel.XlPaperSize.xlPaperLegal
                 Case "Executive"
-                    sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperExecutive
+                    sheet.PageSetup.PaperSize = 7 'Excel.XlPaperSize.xlPaperExecutive
                 Case "A3"
-                    sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA3
+                    sheet.PageSetup.PaperSize = 8 'Excel.XlPaperSize.xlPaperA3
                 Case "A4"
-                    sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA4
+                    sheet.PageSetup.PaperSize = 9 'Excel.XlPaperSize.xlPaperA4
                 Case "A5"
-                    sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA5
+                    sheet.PageSetup.PaperSize = 11 'Excel.XlPaperSize.xlPaperA5
                 Case Else
-                    sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA4
+                    sheet.PageSetup.PaperSize = 9 'Excel.XlPaperSize.xlPaperA4
             End Select
         End If
     End Sub
@@ -3437,6 +4194,329 @@ ErrorOpenFile:
         chkUnChecked.Checked = False
     End Sub
 
+
+    ' Hàm cũ không dùng nữa.
+    'Private Function GetIntColumnExcel(ByVal sColumn As String) As Integer
+    '    If sColumn.Length = 1 Then
+
+    '        Return (Asc(sColumn) - Asc("A"))
+    '    Else
+    '        Return (Asc(sColumn.Substring(0, 1)) - Asc("A") + 1) * 26 + (Asc(sColumn.Substring(1, 1)) - Asc("A"))
+    '    End If
+
+    'End Function
+
+    'Private Function GetStringColumnExcel(ByVal sColumn As Integer) As String
+    '    If sColumn <= 25 Then
+    '        Return Chr(sColumn + Asc("A"))
+    '    Else
+    '        Return (Chr(sColumn \ 26 + Asc("A") - 1) + Chr(sColumn Mod 26 + Asc("A"))).ToString
+    '    End If
+    'End Function
 #End Region
 
+
+#Region "Const of tdbgPara - Total of Columns: 4"
+    Private Const COLM_Description As String = "Description" ' Nội dung
+    Private Const COLM_FieldExcel As String = "FieldExcel"   ' Tham số
+    Private Const COLM_Value As String = "Value"             ' Value
+#End Region
+
+#Region "Danh sách tham số"
+
+    Private Function ExportMaster(ByVal filePath As String) As String
+        Dim book As Object 'Excel.Workbook
+        If chkIsNoFormula.Checked Then
+            GetFormula(dicFormula, book) 'Bổ sung lấy công thức của sheet excel 25/02/2016
+        Else
+            dicFormula = New Dictionary(Of String, String) 'Set lại =0
+        End If
+        If txtPathIn.Text <> "" Then
+            filePath = txtPathIn.Text
+        Else
+            If txtPathOut.Text.Trim = "" Then
+                ' Return filePath
+                GoTo close
+            End If
+        End If
+
+        If txtPathOut.Text <> "" Then
+            Dim fileName As String = filePath.Substring(filePath.LastIndexOf("\"c) + 1, filePath.Length - filePath.LastIndexOf("\"c) - 1)
+            filePath = txtPathOut.Text.Trim() & "\" & fileName
+            filePath = filePath.Replace("\\", "\")
+        End If
+        Dim name As String = Strings.Left(filePath, filePath.LastIndexOf("."c)) 'lấy tên file
+        filePath = filePath.Replace(name, name & "_") 'namefile_yyMMdd
+        If tdbgM.RowCount = 0 Then
+            Try
+ReloadFile:
+                If txtPathIn.Text.Trim <> "" Then
+                    If chkIsNoFormula.Checked Then
+                        book.SaveAs(filePath)
+                        D99X0011.CloseExcelApp(EXL, book)
+                    Else
+                        IO.File.Copy(txtPathIn.Text, filePath, True) 'Sao chép mẫu ra để thêm dữ liệu
+                    End If
+
+                End If
+
+            Catch ex As Exception
+                If CloseProcessWindow(filePath) Then GoTo ReloadFile
+                Return ""
+            End Try
+            Return filePath
+        End If
+        If txtPathIn.Text.Trim <> "" Then
+
+            If book Is Nothing Then
+                EXL = CreateObject("Excel.Application") ' EXL = New Excel.Application
+                EXL.Application.Interactive = True
+                EXL.Application.UserControl = True
+                EXL.Application.DisplayAlerts = False
+                book = EXL.Workbooks.Open(txtPathIn.Text.Trim) 'fileName) 
+            End If
+            '    Dim book As Excel.Workbook
+            Try
+                'EXL.Application.Interactive = True
+                'EXL.Application.UserControl = True
+                'EXL.Application.DisplayAlerts = False
+                'book = EXL.Workbooks.Open(txtPathIn.Text.Trim) 'fileName) mở file mẫu đang chọn
+                For i As Integer = 0 To tdbgM.RowCount - 1
+                    'Dim range As Excel.Range = EXL.Cells.Find(What:=L3String(tdbgM(i, COLM_FieldExcel)), MatchCase:=False)
+                    Dim range As Object = EXL.Cells.Find(What:=L3String(tdbgM(i, COLM_FieldExcel)), MatchCase:=False)
+                    If range Is Nothing Then Continue For
+                    If range.Value2 Is Nothing Then Continue For
+                    Dim sValue As String = range.Value2
+                    If sValue = L3String(tdbgM(i, COLM_FieldExcel)) Then
+                        range.Value2 = tdbgM(i, COLM_Value) ' TH gắn overwrite cell thì giữ lại định dạng
+                    Else
+                        range.Value2 = sValue.Replace(L3String(tdbgM(i, COLM_FieldExcel)), L3String(tdbgM(i, COLM_Value)))
+                    End If
+                    i -= 1 ' Quét lại lần nữa TH khách hàng thiết lập nhiều lần
+                Next
+                book.SaveAs(filePath)
+            Catch ex As Exception
+                D99C0008.MsgL3(ex.Message)
+            End Try
+close:
+            EXL = Nothing
+            D99X0011.CloseExcelApp(EXL, book)
+
+        End If
+        Return filePath
+    End Function
+
+    Dim sFilter As New System.Text.StringBuilder()
+    Dim bRefreshFilter As Boolean = False
+    Private Sub tdbgM_FilterChange(ByVal sender As Object, ByVal e As System.EventArgs) Handles tdbgM.FilterChange
+        Try
+            If (dtGrid Is Nothing) Then Exit Sub
+            If bRefreshFilter Then Exit Sub
+            FilterChangeGrid(tdbgM, sFilter) 'Nếu có Lọc khi In
+            ReLoadTDBGrid()
+        Catch ex As Exception
+            'Update 11/05/2011: Tạm thời có lỗi thì bỏ qua không hiện message
+            WriteLogFile(ex.Message) 'Ghi file log TH nhập số >MaxInt cột Byte
+        End Try
+    End Sub
+
+    Private Sub tdbgM_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles tdbgM.KeyDown
+        Me.Cursor = Cursors.WaitCursor
+        HotKeyCtrlVOnGrid(tdbgM, e)
+        Me.Cursor = Cursors.Default
+    End Sub
+
+    Private Sub tdbgM_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles tdbgM.KeyPress
+        If tdbgM.Columns(tdbgM.Col).ValueItems.Presentation = C1.Win.C1TrueDBGrid.PresentationEnum.CheckBox Then
+            e.Handled = CheckKeyPress(e.KeyChar)
+        ElseIf tdbgM.Splits(tdbgM.SplitIndex).DisplayColumns(tdbgM.Col).Style.HorizontalAlignment = C1.Win.C1TrueDBGrid.AlignHorzEnum.Far Then
+            e.Handled = CheckKeyPress(e.KeyChar, EnumKey.NumberDot)
+        End If
+    End Sub
+
+    Private Sub ReLoadTDBGrid()
+        Dim strFind As String = ""
+        If sFilter.ToString.Equals("") = False And strFind.Equals("") = False Then strFind &= " And "
+        strFind &= sFilter.ToString
+        dtGrid.DefaultView.RowFilter = strFind
+        FooterTotalGrid(tdbgM, COLM_Description)
+    End Sub
+#End Region
+
+    Private Sub txtPathIn_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtPathIn.TextChanged
+        chkIsNoFormula.Visible = txtPathIn.Text <> ""
+    End Sub
+
+    Private Sub txtPathIn_Validated(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtPathIn.Validated
+        'If btnChoosePathIn.Focused Then Exit Sub
+        'If Not CheckPathIn() Then Exit Sub
+        cboDefaultSheet.Enabled = Not (txtPathIn.Text.Trim = "")
+        If txtPathIn.Text.Trim = "" Then
+            cboDefaultSheet.Enabled = False
+            cboDefaultSheet.Text = ""
+            cboDefaultSheet.Items.Clear()
+            chkIsMarkTimer.Checked = False
+            chkIsMarkTimer.Enabled = False
+            lblSampleFileName.Text = ""
+
+        Else
+            cboDefaultSheet.Enabled = True
+            If My.Computer.FileSystem.FileExists(txtPathIn.Text) = True Then
+                If L3String(txtPathIn.Tag) <> txtPathIn.Text Then GetNameSheets()
+            Else
+                cboDefaultSheet.Items.Clear()
+                cboDefaultSheet.Text = ""
+            End If
+            chkIsMarkTimer.Enabled = True
+        End If
+        chkFileTimer_Click(Nothing, Nothing)
+        txtPathIn.Tag = txtPathIn.Text
+    End Sub
+
+    Private Sub txtPathOut_Validated(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles txtPathOut.Validated
+        'If btnChoosePathOut.Focused Then Exit Sub
+        'If Not CheckPathOut() Then Exit Sub
+        chkFileTimer_Click(Nothing, Nothing)
+    End Sub
+    'Private Sub btnChoosePathIn_LostFocus(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnChoosePathIn.LostFocus
+    '    txtPathIn_Validated(Nothing, Nothing)
+    'End Sub
+
+    'Private Sub btnChoosePathOut_LostFocus(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnChoosePathOut.LostFocus
+    '    txtPathOut_Validated(Nothing, Nothing)
+    'End Sub
+
+    Private Sub chkFileTimer_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles chkIsMarkTimer.Click
+        Try
+            Dim filePath = DEFAULT_PATH_OUT & "\Data.xlsx"
+            If txtPathIn.Text <> "" Then
+                filePath = txtPathIn.Text
+            End If
+            If txtPathOut.Text <> "" Then
+                Dim fileName As String = filePath.Substring(filePath.LastIndexOf("\"c) + 1, filePath.Length - filePath.LastIndexOf("\"c) - 1)
+                filePath = txtPathOut.Text.Trim() & "\" & fileName
+                filePath = filePath.Replace("\\", "\")
+            End If
+            Dim name As String = Strings.Left(filePath, filePath.LastIndexOf("."c)) 'lấy tên file
+            If chkIsMarkTimer.Checked Then filePath = filePath.Replace(name, name & "_" & Format(Now, "yyMMdd")) 'namefile_yyMMdd
+            lblSampleFileName.Text = filePath
+        Catch ex As Exception
+            lblSampleFileName.Text = ""
+        End Try
+    End Sub
+
+    Private Sub btnPreviewFormula_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
+        tdbgFormula.Visible = Not tdbgFormula.Visible
+    End Sub
+
+    'Xuất nhiều thì qua sheet mới
+    'copy fomular
+    'Lúc nào cũng kiểm tra công thức hay bổ sung check thiết lập
+    Dim dicFormula As New Dictionary(Of String, String) 'Get cột excel và công thức
+    Private Sub GetFormula(ByRef dicFormula As Dictionary(Of String, String), ByRef book As Object)
+        If txtPathIn.Text = "" Then Exit Sub 'Chỉ xét công thức khi chọn mẫu
+        EXL = CreateObject("Excel.Application") 'New Excel.Application
+        Dim sheet As Object 'Excel.Worksheet
+        Try
+            EXL.Application.Interactive = True
+            EXL.Application.UserControl = True
+            EXL.Application.DisplayAlerts = False
+            book = EXL.Workbooks.Open(txtPathIn.Text.Trim) 'fileName) mở file mẫu đang chọn
+            sheet = book.Worksheets(cboDefaultSheet.SelectedIndex + 1)
+            Dim rowBegin As Integer = L3Int(txtRow.Text)
+            For c As Integer = 1 To sheet.Columns.Count 'Vì excel bắt đầu từ 1
+                Dim range As Object = sheet.Cells(rowBegin, c) 'Dim range As Excel.Range = sheet.Cells(rowBegin, c)
+                If range.HasFormula Then
+                    Dim key As String = c - 1
+                    If dicFormula.ContainsKey(key) Then
+                        dicFormula.Item(key) = range.Formula '-1 vì bắt đầu từ 1
+                    Else
+                        dicFormula.Add(key, range.Formula)
+                    End If
+                End If
+            Next
+            'Chèn dòng dùng core excel khi check vào Công thức và có chọn mẫu
+            Dim iTotalRow As Integer = _dtExportTable.DefaultView.ToTable.Rows.Count
+            If dicFormula.Count > 0 AndAlso chkDisplayTitle.Checked = False Then iTotalRow -= 1 'bỏ dòng insert có công thức, dữ liệu 7 dòng thì insert thêm 6 dòng nếu không có hiển thị Tiêu đề
+            Dim iRow As Integer = L3Int(txtRow.Text)
+            If txtTitle.Text.Trim <> "" Then
+                InsertRowForWorksheet(sheet, 3, iRow, False)
+                iRow += 3
+            End If
+            'Dùng cho trường hợp giữ lại phần Footer của file có sẵn
+            '  If chkDisplayTitle.Checked Then iTotalRow += 1
+            'If chkShowSum.Checked Then'Dòng tổng không copy
+            '    Dim dr() As DataRow = dtGrid.Select("IsSum=1 And " & "IsUsed=1")
+            '    If dr.Length > 0 Then iTotalRow += 1
+            'End If
+            InsertRowForWorksheet(sheet, iTotalRow, iRow)
+        Catch ex As Exception
+            D99C0008.MsgL3(ex.Message)
+            EXL = Nothing
+            D99X0011.CloseExcelApp(EXL, book)
+        Finally
+
+        End Try
+    End Sub
+
+    Private Sub InsertRowForWorksheet(ByRef worksheet As Excel.Worksheet, ByVal iRowCount As Integer, ByVal iRow As Integer, Optional ByVal bCopyRow As Boolean = True)
+        ' Private Sub InsertRowForWorksheet(ByRef worksheet As Object, ByVal iRowCount As Integer, ByVal iRow As Integer, Optional ByVal bCopyRow As Boolean = True)
+        'Lê Anh Vũ : Khi nâng cấp lên VS 2013 thay thế bằng đoạn code sau: 
+        'worksheet.Rows(iRow).ReSize(iRowCount - 1).Insert(Excel.XlInsertShiftDirection.xlShiftDown, worksheet.Rows(iRow).Copy())
+        'Exit Sub
+        Dim book As Excel.Workbook
+        ' Dim sheet As Excel.Worksheet
+        If worksheet Is Nothing Then
+            EXL = CreateObject("Excel.Application") 'EXL = New Excel.Application
+            EXL.Application.Interactive = True
+            EXL.Application.UserControl = True
+            EXL.Application.DisplayAlerts = False
+            book = EXL.Workbooks.Open(txtPathIn.Text.Trim) 'fileName) 
+            worksheet = book.Worksheets(cboDefaultSheet.SelectedIndex + 1) 'Chưa làm trường hợp nhiều quá copy sheet mới
+        End If
+
+        Dim excelRang As Excel.Range
+        Dim sCol As String
+        sCol = ColumnIndexToColumnLetter(worksheet.Columns.Count)
+        'excelRang.Value2 = ""
+        Dim iCountRowAdd As Integer = 0
+        Dim iAdd As Integer = 0
+        Dim index As Integer
+
+        For k As Integer = 0 To iRowCount - 1
+            If bCopyRow Then
+                index = k
+                'Office không cho Insert 1 lúc trên 2^14 dòng
+                If k > 14 Then index = 14
+                iAdd = Math.Pow(2, index)
+                If iCountRowAdd + iAdd >= iRowCount Then
+                    iAdd = iRowCount - iCountRowAdd
+                    If iAdd < 1 Then Exit For
+                    excelRang = worksheet.Range("A" & iRow & ":" & sCol & iRow + iAdd - 1)
+                    worksheet.Rows(iRow + iAdd).Insert(-4121, excelRang.Copy()) 'worksheet.Rows(iRow + iAdd).Insert(Excel.XlInsertShiftDirection.xlShiftDown, excelRang.Copy())
+                    Exit For
+                Else
+                    iCountRowAdd += iAdd
+                    excelRang = worksheet.Range("A" & iRow & ":" & sCol & iRow + iAdd - 1)
+                    worksheet.Rows(iRow + iAdd).Insert(-4121, excelRang.Copy()) 'worksheet.Rows(iRow + iAdd).Insert(Excel.XlInsertShiftDirection.xlShiftDown, excelRang.Copy())
+                End If
+            Else
+                excelRang = worksheet.Range("A" & worksheet.Rows.Count - 1 & ":" & sCol & worksheet.Rows.Count - 1)
+                worksheet.Rows(worksheet.Rows.Count).Insert(-4121, excelRang.Copy()) 'worksheet.Rows(worksheet.Rows.Count).Insert(Excel.XlInsertShiftDirection.xlShiftDown, excelRang.Copy())
+            End If
+        Next
+    End Sub
+
+    Public Function ColumnIndexToColumnLetter(ByVal colIndex As Integer) As String
+        Dim div As Integer = colIndex
+        Dim colLetter As String = ""
+        Dim modnum As Integer = 0
+
+        While div > 0
+            modnum = (div - 1) Mod 26
+            colLetter = Chr(65 + modnum) + colLetter
+            div = CInt((div - modnum) \ 26)
+        End While
+        Return colLetter
+    End Function
 End Class

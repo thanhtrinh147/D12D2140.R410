@@ -19,14 +19,18 @@ Partial Class D12F3070
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(D12F3070))
-        Me.grpList = New System.Windows.Forms.GroupBox
-        Me.tdbg = New C1.Win.C1TrueDBGrid.C1TrueDBGrid
-        Me.btnNext = New System.Windows.Forms.Button
-        Me.btnClose = New System.Windows.Forms.Button
-        Me.btnF12 = New System.Windows.Forms.Button
+        Me.grpList = New System.Windows.Forms.GroupBox()
+        Me.tdbg = New C1.Win.C1TrueDBGrid.C1TrueDBGrid()
+        Me.btnNext = New System.Windows.Forms.Button()
+        Me.btnClose = New System.Windows.Forms.Button()
+        Me.btnF12 = New System.Windows.Forms.Button()
+        Me.ContextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.mnsExportToExcel = New System.Windows.Forms.ToolStripMenuItem()
         Me.grpList.SuspendLayout()
         CType(Me.tdbg, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.ContextMenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
         'grpList
@@ -47,13 +51,12 @@ Partial Class D12F3070
         Me.tdbg.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbg.AllowSort = False
         Me.tdbg.AlternatingRows = True
-        Me.tdbg.CaptionHeight = 17
         Me.tdbg.ColumnFooters = True
+        Me.tdbg.ContextMenuStrip = Me.ContextMenuStrip1
         Me.tdbg.EmptyRows = True
         Me.tdbg.ExtendRightColumn = True
         Me.tdbg.FlatStyle = C1.Win.C1TrueDBGrid.FlatModeEnum.Standard
         Me.tdbg.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        Me.tdbg.GroupByCaption = "Drag a column header here to group by that column"
         Me.tdbg.Images.Add(CType(resources.GetObject("tdbg.Images"), System.Drawing.Image))
         Me.tdbg.Location = New System.Drawing.Point(9, 20)
         Me.tdbg.MarqueeStyle = C1.Win.C1TrueDBGrid.MarqueeEnum.FloatingEditor
@@ -61,9 +64,8 @@ Partial Class D12F3070
         Me.tdbg.Name = "tdbg"
         Me.tdbg.PreviewInfo.Location = New System.Drawing.Point(0, 0)
         Me.tdbg.PreviewInfo.Size = New System.Drawing.Size(0, 0)
-        Me.tdbg.PreviewInfo.ZoomFactor = 75
+        Me.tdbg.PreviewInfo.ZoomFactor = 75.0R
         Me.tdbg.PrintInfo.PageSettings = CType(resources.GetObject("tdbg.PrintInfo.PageSettings"), System.Drawing.Printing.PageSettings)
-        Me.tdbg.RowHeight = 15
         Me.tdbg.Size = New System.Drawing.Size(991, 590)
         Me.tdbg.SplitDividerSize = New System.Drawing.Size(1, 1)
         Me.tdbg.TabAcrossSplits = True
@@ -100,6 +102,18 @@ Partial Class D12F3070
         Me.btnF12.Text = "Hiển thị"
         Me.btnF12.UseVisualStyleBackColor = True
         '
+        'ContextMenuStrip1
+        '
+        Me.ContextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnsExportToExcel})
+        Me.ContextMenuStrip1.Name = "ContextMenuStrip"
+        Me.ContextMenuStrip1.Size = New System.Drawing.Size(153, 48)
+        '
+        'mnsExportToExcel
+        '
+        Me.mnsExportToExcel.Name = "mnsExportToExcel"
+        Me.mnsExportToExcel.Size = New System.Drawing.Size(152, 22)
+        Me.mnsExportToExcel.Text = "Xuất &Excel"
+        '
         'D12F3070
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -120,6 +134,7 @@ Partial Class D12F3070
         Me.Text = "So sÀnh giÀ giöa cÀc nhª cung cÊp cïa y£u cÇu mua hªng - D12F3070"
         Me.grpList.ResumeLayout(False)
         CType(Me.tdbg, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.ContextMenuStrip1.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
@@ -128,4 +143,6 @@ Partial Class D12F3070
     Private WithEvents btnNext As System.Windows.Forms.Button
     Private WithEvents btnClose As System.Windows.Forms.Button
     Private WithEvents btnF12 As System.Windows.Forms.Button
+    Private WithEvents ContextMenuStrip1 As System.Windows.Forms.ContextMenuStrip
+    Private WithEvents mnsExportToExcel As System.Windows.Forms.ToolStripMenuItem
 End Class

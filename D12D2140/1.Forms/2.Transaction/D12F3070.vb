@@ -58,6 +58,7 @@ Public Class D12F3070
         Me.Cursor = Cursors.WaitCursor
         ' gbEnabledUseFind = False
         LoadInfoGeneral() 'Load System/ Option /... in DxxD9940
+        SetShortcutPopupMenuNew(Me, Nothing, ContextMenuStrip1)
         COL_Total = tdbg.Columns.Count
         tdbg_NumberFormat()
         AddField()
@@ -69,7 +70,7 @@ Public Class D12F3070
         LoadTDBGrid()
         LoadLanguage()
         CallD99U1111()
-        dSetResolutionForm = SetResolutionForm(Me)
+        dSetResolutionForm = SetResolutionForm(Me, ContextMenuStrip1)
         Me.Cursor = Cursors.Default
     End Sub
 
@@ -478,9 +479,29 @@ Public Class D12F3070
         sSQL.Append(")")
 
         Return sSQL
-
     End Function
 
-    
-    
+    Private dtCaptionCols As DataTable
+    Private Sub mnsExportToExcel_Click(sender As Object, e As EventArgs) Handles mnsExportToExcel.Click
+        '18/7/2018, 	LEANHVU: id 107302-BỔ SUNG TÍNH NĂNG XUẤT EXCEL TẠI MÀN HÌNH SO SÁNH NHÀ CUNG CẤP
+        Dim arrColObligatory() As Integer = {}
+        Dim Arr As New ArrayList
+        For i As Integer = 0 To tdbg.Splits.Count - 1
+            AddColVisible(tdbg, i, Arr, arrColObligatory, , , gbUnicode)
+        Next
+
+        'Tạo tableCaption: đưa tất cả các cột trên lưới có Visible = True vào table 
+        dtCaptionCols = CreateTableForExcelOnly(tdbg, Arr)
+
+        Dim frm As New D99F2222
+        frm.UseUnicode = gbUnicode
+        frm.dtLoadGrid = dtCaptionCols
+        frm.dtExportTable = dtGrid
+        frm.GroupColumns = gsGroupColumns
+        frm.FormID = Me.Name
+        frm.tdbgFr = tdbg
+        frm.ShowDialog()
+    End Sub
+
+
 End Class
