@@ -199,6 +199,7 @@ Public Class D12F3050
 
         CallD99U1111()
         InputbyUnicode(Me, gbUnicode)
+        SetBackColorObligatory() '2/8/2018, id 110407-AICA - Sửa:" Các trường: Loại đối tượng, Đối tượng, Loại tiền;(màn hình D12F3050) bắt buộc nhập nhưng không hiển thị màu nền bắt buộc nhập"
         SetResolutionForm(Me)
         Me.Cursor = Cursors.Default
     End Sub
@@ -1288,6 +1289,15 @@ Public Class D12F3050
         Next h
         Return True
     End Function
+
+    '2/8/2018, id 110407-AICA - Sửa:" Các trường: Loại đối tượng, Đối tượng, Loại tiền;(màn hình D12F3050) bắt buộc nhập nhưng không hiển thị màu nền bắt buộc nhập"
+    Private Sub SetBackColorObligatory()
+        tdbg.Splits(SPLIT2).DisplayColumns(COL_ObjectTypeID).Style.BackColor = COLOR_BACKCOLOROBLIGATORY
+        tdbg.Splits(SPLIT2).DisplayColumns(COL_ObjectID).Style.BackColor = COLOR_BACKCOLOROBLIGATORY
+        tdbg.Splits(SPLIT2).DisplayColumns(COL_CurrencyID).Style.BackColor = COLOR_BACKCOLOROBLIGATORY
+        tdbg.Splits(SPLIT2).DisplayColumns(COL_ExchangeRate).Style.BackColor = COLOR_BACKCOLOROBLIGATORY
+        tdbg.Splits(SPLIT2).DisplayColumns(COL_OQuantity).Style.BackColor = COLOR_BACKCOLOROBLIGATORY
+    End Sub
 
     Private Sub btnSave_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSave.Click
         'Chặn lỗi khi đang vi phạm trên lưới mà nhấn Alt + L
