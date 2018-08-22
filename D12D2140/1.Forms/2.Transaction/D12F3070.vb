@@ -209,7 +209,7 @@ Public Class D12F3070
                     AddDecimalColumns(arrCol, dc.DataField, DxxFormat.D08_QuantityDecimals, 28, 8)
                     sSumFooter.Add(dc.DataField)
                 ElseIf dc.DataField.EndsWith("UnitPrice") Then
-                    AddDecimalColumns(arrCol, dc.DataField, DxxFormat.D08_UnitCostDecimals, 28, 8)
+                    AddDecimalColumns(arrCol, dc.DataField, DxxFormat.D07_UnitCostDecimals, 28, 8) 'NGOCHUY - 110764 - 8/8/2018
                 ElseIf dc.DataField.EndsWith("OAmount") Then
                     AddDecimalColumns(arrCol, dc.DataField, DxxFormat.DecimalPlaces, 28, 8)
                     sSumFooter.Add(dc.DataField)
