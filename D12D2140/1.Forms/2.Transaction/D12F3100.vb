@@ -540,7 +540,22 @@ Public Class D12F3100
             Exit Sub
         End If
 
-        If e.KeyCode = Keys.S And e.Control Then HeadClick(tdbg.Col)
+        If e.KeyCode = Keys.S And e.Control Then CtrlS(tdbg.Row) '12/9/2018, Lê Thị Thu Thảo:id 112392-Không check chọn được nhiều mặt hàng ' HeadClick(tdbg.Col)
+    End Sub
+
+    '12/9/2018, Lê Thị Thu Thảo:id 112392-Không check chọn được nhiều mặt hàng
+    Private Sub CtrlS(iRow As Integer)
+        tdbg.UpdateData()
+        If tdbg.RowCount < 2 Then Exit Sub
+
+        Dim bChoose As Boolean = L3Bool(tdbg(iRow, COL_Choose))
+        Dim j As Integer = tdbg.RowCount - 1
+
+        While j > iRow
+            tdbg(j, COL_Choose) = bChoose
+            j -= 1
+        End While
+        tdbg.UpdateData()
     End Sub
 
     Private Sub tdbg_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles tdbg.KeyPress
