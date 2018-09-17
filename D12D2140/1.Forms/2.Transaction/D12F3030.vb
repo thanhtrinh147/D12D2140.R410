@@ -558,9 +558,25 @@ Public Class D12F3030
         If tdbgD.FilterActive Then HotKeyCtrlVOnGrid(tdbgD, e) : Exit Sub
 
         If e.KeyCode = Keys.S And e.Control And tdbgD.Col = IndexOfColumn(tdbgD, COLD_Choose) Then
-            L3HeadClick(tdbgD, tdbgD.Col, bSelectDetail)
+            'L3HeadClick(tdbgD, tdbgD.Col, bSelectDetail)
+            CtrlS_D(tdbgD.Row) '17/9/2018, Lê Thị Thu Thảo:id 113473-Hỗ trợ tính năng check chọn nhiều dòng mặt hàng
         End If
         'Me.Cursor = Cursors.Default
+    End Sub
+
+    '17/9/2018, Lê Thị Thu Thảo:id 113473-Hỗ trợ tính năng check chọn nhiều dòng mặt hàng
+    Private Sub CtrlS_D(iRow As Integer)
+        tdbgD.UpdateData()
+        If tdbgD.RowCount < 2 Then Exit Sub
+
+        Dim bChoose As Boolean = L3Bool(tdbgD(iRow, COLD_Choose))
+        Dim j As Integer = tdbgD.RowCount - 1
+
+        While j > iRow
+            tdbgD(j, COLD_Choose) = bChoose
+            j -= 1
+        End While
+        tdbgD.UpdateData()
     End Sub
 
     Private Sub tdbgD_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles tdbgD.KeyPress
