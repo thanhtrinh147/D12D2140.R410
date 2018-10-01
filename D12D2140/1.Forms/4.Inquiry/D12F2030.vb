@@ -488,4 +488,19 @@ Public Class D12F2030
                 e.Handled = CheckKeyPress(e.KeyChar)
         End Select
     End Sub
+
+    Public Sub New()
+
+        ' This call is required by the designer.
+        InitializeComponent()
+
+        ' Add any initialization after the InitializeComponent() call.
+        '1/10/2018, id 113754-Mở rộng toàn màn hình D12F3030 - Lựa chọn nhà cung cấp (Bước 1) khi gặp màn hình lớn (24 inch)
+        AnchorForControl(EnumAnchorStyles.TopLeftRight, grp1)
+        AnchorForControl(EnumAnchorStyles.TopLeftRight, txtObjectName)
+        AnchorForControl(EnumAnchorStyles.TopRight, btnFilter)
+        AnchorResizeColumnsGrid(EnumAnchorStyles.TopLeftRightBottom, tdbg)
+        AnchorForControl(EnumAnchorStyles.BottomLeft, btnF12)
+
+    End Sub
 End Class
