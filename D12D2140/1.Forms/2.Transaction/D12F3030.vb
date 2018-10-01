@@ -22,7 +22,8 @@ Public Class D12F3030
     Private Const COLM_PRID As String = "PRID"               ' PRID
 #End Region
 
-#Region "Const of tdbgD - Total of Columns: 64"
+
+#Region "Const of tdbgD - Total of Columns: 65"
     Private Const COLD_Choose As String = "Choose"                     ' Chọn
     Private Const COLD_PRTransactionID As String = "PRTransactionID"   ' PRTransactionID
     Private Const COLD_InventoryID As String = "InventoryID"           ' Mã hàng
@@ -66,6 +67,7 @@ Public Class D12F3030
     Private Const COLD_ProjectName As String = "ProjectName"           ' Tên dự án
     Private Const COLD_TaskID As String = "TaskID"                     ' Mã hạng mục
     Private Const COLD_TaskName As String = "TaskName"                 ' Tên hạng mục
+    Private Const COLD_PRVoucherNo As String = "PRVoucherNo"           ' Số phiếu YCMH
     Private Const COLD_MPSVoucherNo As String = "MPSVoucherNo"         ' Kế hoạch sản xuất
     Private Const COLD_PeriodID As String = "PeriodID"                 ' Kỳ sản xuất
     Private Const COLD_ProductID As String = "ProductID"               ' Sản phẩm
@@ -88,6 +90,7 @@ Public Class D12F3030
     Private Const COLD_DRef5 As String = "DRef5"                       ' DRef5
     Private Const COLD_PRID As String = "PRID"                         ' PRID
 #End Region
+
 
 
     Dim dtGridMaster, dtGridDetail As DataTable
@@ -167,7 +170,8 @@ Public Class D12F3030
         tdbgD.Columns("UnitID").Caption = rl3("DVT") 'ĐVT
         'tdbgD.Columns("ApprovedQuantity").Caption = rl3("So_luong_duyet") 'Số lượng duyệt COMMENT 09/06/08
         tdbgD.Columns("ApprovedQuantity").Caption = rl3("SL_yeu_cau") 'SL Yêu cầu
-        tdbgD.Columns("POQuantity").Caption = rl3("SL_duoc_phep_lap_don_dat_hang") 'SL được phép lập đơn đặt hàng
+        tdbgD.Columns("POQuantity").Caption = rL3("SL_duoc_phep_lap_don_dat_hang") 'SL được phép lập đơn đặt hàng
+        tdbgD.Columns(COLD_PRVoucherNo).Caption = rL3("So_phieu_YCMH")           ' Số phiếu YCMH
         tdbgD.Columns("MPSVoucherNo").Caption = rl3("Ke_hoach_san_xuat") 'Kế hoạch sản xuất
         tdbgD.Columns("PeriodID").Caption = rl3("Ky_san_xuat") 'Kỳ sản xuất
         tdbgD.Columns("ProductID").Caption = rl3("San_pham") 'Sản phẩm
@@ -431,6 +435,7 @@ Public Class D12F3030
     Private Sub ResetGrid()
         FooterTotalGrid(tdbgM, COLM_PRVoucherNo)
         If dtGridDetail IsNot Nothing Then FooterTotalGrid(tdbgD, COLD_InventoryID)
+        FooterSumFilter(tdbgD, sFilterDetail.ToString, COLD_ApprovedQuantity, COLD_POQuantity) '1/10/2018, Nguyễn Thị Ý Nhi:id 113610-Bổ sung cột Số phiếu YCMH và dòng Sum cho hai cột SL yêu cầu, SL được phép lập đơn đặt hàng
     End Sub
 
 #Region "tdbgM"
@@ -726,8 +731,10 @@ Public Class D12F3030
             SaveLastChoose(dtGridDetail, dtBefore, "PRTransactionID")
         End If
         LoadDataSource(tdbgD, dtGridDetail, gbUnicode)
+        FooterSumFilter(tdbgD, sFilterDetail.ToString, COLD_ApprovedQuantity, COLD_POQuantity) '1/10/2018, Nguyễn Thị Ý Nhi:id 113610-Bổ sung cột Số phiếu YCMH và dòng Sum cho hai cột SL yêu cầu, SL được phép lập đơn đặt hàng
         If dtGridDetail.Rows.Count > 0 Then gbEnabledUseFindDetail = True
     End Sub
+
 
 
     Dim dtNRef As DataTable
