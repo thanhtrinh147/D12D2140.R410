@@ -21,23 +21,7 @@ Partial Class D12F3030
     Private Sub InitializeComponent()
         Dim mnuFindLink As C1.Win.C1Command.C1CommandLink
         Dim mnuListAllLink As C1.Win.C1Command.C1CommandLink
-        Dim Style9 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style10 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style11 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style12 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style13 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style14 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style15 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style16 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style1 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style2 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style3 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style4 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style5 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(D12F3030))
-        Dim Style6 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style7 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
-        Dim Style8 As C1.Win.C1List.Style = New C1.Win.C1List.Style()
         Me.mnuFind = New C1.Win.C1Command.C1Command()
         Me.mnuListAll = New C1.Win.C1Command.C1Command()
         Me.btnClose = New System.Windows.Forms.Button()
@@ -78,6 +62,7 @@ Partial Class D12F3030
         'mnuFind
         '
         Me.mnuFind.Name = "mnuFind"
+        Me.mnuFind.ShortcutText = ""
         Me.mnuFind.Text = "Tìm &kiếm"
         '
         'mnuListAllLink
@@ -87,6 +72,7 @@ Partial Class D12F3030
         'mnuListAll
         '
         Me.mnuListAll.Name = "mnuListAll"
+        Me.mnuListAll.ShortcutText = ""
         Me.mnuListAll.Text = "&Liệt kê tất cả"
         '
         'btnClose
@@ -173,6 +159,8 @@ Partial Class D12F3030
         '
         Me.C1ContextMenu.CommandLinks.AddRange(New C1.Win.C1Command.C1CommandLink() {mnuFindLink, mnuListAllLink})
         Me.C1ContextMenu.Name = "C1ContextMenu"
+        Me.C1ContextMenu.ShortcutText = ""
+        Me.C1ContextMenu.VisualStyleBase = C1.Win.C1Command.VisualStyle.OfficeXP
         '
         'C1CommandHolder
         '
@@ -197,7 +185,6 @@ Partial Class D12F3030
         Me.tdbgD.FilterBar = True
         Me.tdbgD.FlatStyle = C1.Win.C1TrueDBGrid.FlatModeEnum.Standard
         Me.tdbgD.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        Me.tdbgD.GroupByCaption = "Drag a column header here to group by that column"
         Me.tdbgD.Images.Add(CType(resources.GetObject("tdbgD.Images"), System.Drawing.Image))
         Me.tdbgD.Location = New System.Drawing.Point(3, 297)
         Me.tdbgD.MultiSelect = C1.Win.C1TrueDBGrid.MultiSelectEnum.None
@@ -231,7 +218,6 @@ Partial Class D12F3030
         Me.tdbgM.FilterBar = True
         Me.tdbgM.FlatStyle = C1.Win.C1TrueDBGrid.FlatModeEnum.Standard
         Me.tdbgM.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        Me.tdbgM.GroupByCaption = "Drag a column header here to group by that column"
         Me.tdbgM.Images.Add(CType(resources.GetObject("tdbgM.Images"), System.Drawing.Image))
         Me.tdbgM.Location = New System.Drawing.Point(3, 37)
         Me.tdbgM.MultiSelect = C1.Win.C1TrueDBGrid.MultiSelectEnum.None
@@ -250,7 +236,7 @@ Partial Class D12F3030
         '
         'btnProduction
         '
-        Me.btnProduction.Location = New System.Drawing.Point(807, 270)
+        Me.btnProduction.Location = New System.Drawing.Point(797, 270)
         Me.btnProduction.Name = "btnProduction"
         Me.btnProduction.Size = New System.Drawing.Size(100, 22)
         Me.btnProduction.TabIndex = 9
@@ -259,9 +245,9 @@ Partial Class D12F3030
         '
         'btnSubInfo
         '
-        Me.btnSubInfo.Location = New System.Drawing.Point(913, 270)
+        Me.btnSubInfo.Location = New System.Drawing.Point(902, 270)
         Me.btnSubInfo.Name = "btnSubInfo"
-        Me.btnSubInfo.Size = New System.Drawing.Size(100, 22)
+        Me.btnSubInfo.Size = New System.Drawing.Size(110, 22)
         Me.btnSubInfo.TabIndex = 10
         Me.btnSubInfo.Text = "Thông tin phụ"
         Me.btnSubInfo.UseVisualStyleBackColor = True
@@ -276,12 +262,10 @@ Partial Class D12F3030
         Me.tdbcPeriodFrom.AutoDropDown = True
         Me.tdbcPeriodFrom.Caption = ""
         Me.tdbcPeriodFrom.CaptionHeight = 17
-        Me.tdbcPeriodFrom.CaptionStyle = Style9
         Me.tdbcPeriodFrom.CharacterCasing = System.Windows.Forms.CharacterCasing.Normal
         Me.tdbcPeriodFrom.ColumnCaptionHeight = 17
         Me.tdbcPeriodFrom.ColumnFooterHeight = 17
         Me.tdbcPeriodFrom.ColumnHeaders = False
-        Me.tdbcPeriodFrom.ContentHeight = 17
         Me.tdbcPeriodFrom.DeadAreaBackColor = System.Drawing.Color.Empty
         Me.tdbcPeriodFrom.DisplayMember = "Period"
         Me.tdbcPeriodFrom.DropdownPosition = C1.Win.C1List.DropdownPositionEnum.LeftDown
@@ -289,14 +273,9 @@ Partial Class D12F3030
         Me.tdbcPeriodFrom.EditorBackColor = System.Drawing.SystemColors.Window
         Me.tdbcPeriodFrom.EditorFont = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
         Me.tdbcPeriodFrom.EditorForeColor = System.Drawing.SystemColors.WindowText
-        Me.tdbcPeriodFrom.EditorHeight = 17
         Me.tdbcPeriodFrom.EmptyRows = True
-        Me.tdbcPeriodFrom.EvenRowStyle = Style10
         Me.tdbcPeriodFrom.ExtendRightColumn = True
         Me.tdbcPeriodFrom.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        Me.tdbcPeriodFrom.FooterStyle = Style11
-        Me.tdbcPeriodFrom.HeadingStyle = Style12
-        Me.tdbcPeriodFrom.HighLightRowStyle = Style13
         Me.tdbcPeriodFrom.Images.Add(CType(resources.GetObject("tdbcPeriodFrom.Images"), System.Drawing.Image))
         Me.tdbcPeriodFrom.ItemHeight = 15
         Me.tdbcPeriodFrom.Location = New System.Drawing.Point(53, 7)
@@ -305,13 +284,9 @@ Partial Class D12F3030
         Me.tdbcPeriodFrom.MaxLength = 32767
         Me.tdbcPeriodFrom.MouseCursor = System.Windows.Forms.Cursors.Default
         Me.tdbcPeriodFrom.Name = "tdbcPeriodFrom"
-        Me.tdbcPeriodFrom.OddRowStyle = Style14
-        Me.tdbcPeriodFrom.RowDivider.Color = System.Drawing.Color.DarkGray
         Me.tdbcPeriodFrom.RowDivider.Style = C1.Win.C1List.LineStyleEnum.None
         Me.tdbcPeriodFrom.RowSubDividerColor = System.Drawing.Color.DarkGray
-        Me.tdbcPeriodFrom.SelectedStyle = Style15
-        Me.tdbcPeriodFrom.Size = New System.Drawing.Size(111, 23)
-        Me.tdbcPeriodFrom.Style = Style16
+        Me.tdbcPeriodFrom.Size = New System.Drawing.Size(111, 22)
         Me.tdbcPeriodFrom.TabIndex = 1
         Me.tdbcPeriodFrom.ValueMember = "Period"
         Me.tdbcPeriodFrom.PropBag = resources.GetString("tdbcPeriodFrom.PropBag")
@@ -326,12 +301,10 @@ Partial Class D12F3030
         Me.tdbcPeriodTo.AutoDropDown = True
         Me.tdbcPeriodTo.Caption = ""
         Me.tdbcPeriodTo.CaptionHeight = 17
-        Me.tdbcPeriodTo.CaptionStyle = Style1
         Me.tdbcPeriodTo.CharacterCasing = System.Windows.Forms.CharacterCasing.Normal
         Me.tdbcPeriodTo.ColumnCaptionHeight = 17
         Me.tdbcPeriodTo.ColumnFooterHeight = 17
         Me.tdbcPeriodTo.ColumnHeaders = False
-        Me.tdbcPeriodTo.ContentHeight = 17
         Me.tdbcPeriodTo.DeadAreaBackColor = System.Drawing.Color.Empty
         Me.tdbcPeriodTo.DisplayMember = "Period"
         Me.tdbcPeriodTo.DropdownPosition = C1.Win.C1List.DropdownPositionEnum.LeftDown
@@ -339,14 +312,9 @@ Partial Class D12F3030
         Me.tdbcPeriodTo.EditorBackColor = System.Drawing.SystemColors.Window
         Me.tdbcPeriodTo.EditorFont = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
         Me.tdbcPeriodTo.EditorForeColor = System.Drawing.SystemColors.WindowText
-        Me.tdbcPeriodTo.EditorHeight = 17
         Me.tdbcPeriodTo.EmptyRows = True
-        Me.tdbcPeriodTo.EvenRowStyle = Style2
         Me.tdbcPeriodTo.ExtendRightColumn = True
         Me.tdbcPeriodTo.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        Me.tdbcPeriodTo.FooterStyle = Style3
-        Me.tdbcPeriodTo.HeadingStyle = Style4
-        Me.tdbcPeriodTo.HighLightRowStyle = Style5
         Me.tdbcPeriodTo.Images.Add(CType(resources.GetObject("tdbcPeriodTo.Images"), System.Drawing.Image))
         Me.tdbcPeriodTo.ItemHeight = 15
         Me.tdbcPeriodTo.Location = New System.Drawing.Point(198, 7)
@@ -355,13 +323,9 @@ Partial Class D12F3030
         Me.tdbcPeriodTo.MaxLength = 32767
         Me.tdbcPeriodTo.MouseCursor = System.Windows.Forms.Cursors.Default
         Me.tdbcPeriodTo.Name = "tdbcPeriodTo"
-        Me.tdbcPeriodTo.OddRowStyle = Style6
-        Me.tdbcPeriodTo.RowDivider.Color = System.Drawing.Color.DarkGray
         Me.tdbcPeriodTo.RowDivider.Style = C1.Win.C1List.LineStyleEnum.None
         Me.tdbcPeriodTo.RowSubDividerColor = System.Drawing.Color.DarkGray
-        Me.tdbcPeriodTo.SelectedStyle = Style7
-        Me.tdbcPeriodTo.Size = New System.Drawing.Size(111, 23)
-        Me.tdbcPeriodTo.Style = Style8
+        Me.tdbcPeriodTo.Size = New System.Drawing.Size(111, 22)
         Me.tdbcPeriodTo.TabIndex = 3
         Me.tdbcPeriodTo.ValueMember = "Period"
         Me.tdbcPeriodTo.PropBag = resources.GetString("tdbcPeriodTo.PropBag")

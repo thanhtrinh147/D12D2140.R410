@@ -522,7 +522,7 @@ Public Class D12F3030
     Private Sub tdbgD_FilterChange(ByVal sender As Object, ByVal e As System.EventArgs) Handles tdbgD.FilterChange
         Try
             If (dtGridDetail Is Nothing) Then Exit Sub
-            If bRefreshFilter Then Exit Sub 'set FilterText ="" thì thoát
+            If bRefreshFilterDetail Then Exit Sub 'set FilterText ="" thì thoát
             'Filter the data 
             FilterChangeGrid(tdbgD, sFilterDetail)
             ReLoadTDBGrid(True, 2)
@@ -1071,4 +1071,17 @@ Public Class D12F3030
   
    
    
+    Public Sub New()
+
+        ' This call is required by the designer.
+        InitializeComponent()
+
+        ' Add any initialization after the InitializeComponent() call.
+        AnchorForControl(EnumAnchorStyles.TopRight, btnFilter)
+        AnchorResizeColumnsGrid(EnumAnchorStyles.TopLeftRightBottom, tdbgM)
+        AnchorForControl(EnumAnchorStyles.BottomRight, btnSubInfo, btnProduction)
+        AnchorResizeColumnsGrid(EnumAnchorStyles.BottomLeftRight, tdbgD)
+        AnchorForControl(EnumAnchorStyles.BottomLeft, btnF12)
+        AnchorForControl(EnumAnchorStyles.BottomRight, btnClose, btnChoose, btnCompare, btnContinue)
+    End Sub
 End Class
