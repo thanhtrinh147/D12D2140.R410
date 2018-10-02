@@ -1058,7 +1058,7 @@ Public Class D12F3030
         If bLoad Then
             dtF12 = Nothing
             usrOption.AddColVisible(tdbgD, SPLIT0, dtF12, 0, arrColObligatory, COLD_Choose, COLD_TaskName)
-            usrOption.AddColVisible(tdbgD, SPLIT1, dtF12, -1, arrColObligatory, COLD_MPSVoucherNo, COLD_DeliveryDate, , 0)
+            usrOption.AddColVisible(tdbgD, SPLIT1, dtF12, -1, arrColObligatory, COLD_PRVoucherNo, COLD_DeliveryDate, , 0)
             usrOption.AddColVisible(tdbgD, SPLIT1, dtF12, -1, arrColObligatory, COLD_NRef1, COLD_DRef5, , 1)
         End If
 
