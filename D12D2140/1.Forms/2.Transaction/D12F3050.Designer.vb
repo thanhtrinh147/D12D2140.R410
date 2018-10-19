@@ -93,7 +93,6 @@ Partial Class D12F3050
         Me.tdbg.FilterBar = True
         Me.tdbg.FlatStyle = C1.Win.C1TrueDBGrid.FlatModeEnum.Standard
         Me.tdbg.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
-        Me.tdbg.GroupByCaption = "Drag a column header here to group by that column"
         Me.tdbg.Images.Add(CType(resources.GetObject("tdbg.Images"), System.Drawing.Image))
         Me.tdbg.Location = New System.Drawing.Point(6, 4)
         Me.tdbg.MarqueeStyle = C1.Win.C1TrueDBGrid.MarqueeEnum.FloatingEditor
@@ -103,7 +102,6 @@ Partial Class D12F3050
         Me.tdbg.PreviewInfo.Size = New System.Drawing.Size(0, 0)
         Me.tdbg.PreviewInfo.ZoomFactor = 75.0R
         Me.tdbg.PrintInfo.PageSettings = CType(resources.GetObject("tdbg.PrintInfo.PageSettings"), System.Drawing.Printing.PageSettings)
-        Me.tdbg.RecordSelectors = False
         Me.tdbg.RowHeight = 15
         Me.tdbg.Size = New System.Drawing.Size(1007, 613)
         Me.tdbg.SplitDividerSize = New System.Drawing.Size(0, 0)
@@ -143,7 +141,7 @@ Partial Class D12F3050
         Me.tdbdVATGroupID.RowHeight = 15
         Me.tdbdVATGroupID.RowSubDividerColor = System.Drawing.Color.DarkGray
         Me.tdbdVATGroupID.ScrollTips = False
-        Me.tdbdVATGroupID.Size = New System.Drawing.Size(350, 147)
+        Me.tdbdVATGroupID.Size = New System.Drawing.Size(376, 147)
         Me.tdbdVATGroupID.Style = Style8
         Me.tdbdVATGroupID.TabIndex = 13
         Me.tdbdVATGroupID.TabStop = False
@@ -181,7 +179,7 @@ Partial Class D12F3050
         Me.tdbdCurrencyID.RowHeight = 15
         Me.tdbdCurrencyID.RowSubDividerColor = System.Drawing.Color.DarkGray
         Me.tdbdCurrencyID.ScrollTips = False
-        Me.tdbdCurrencyID.Size = New System.Drawing.Size(350, 147)
+        Me.tdbdCurrencyID.Size = New System.Drawing.Size(401, 147)
         Me.tdbdCurrencyID.Style = Style16
         Me.tdbdCurrencyID.TabIndex = 12
         Me.tdbdCurrencyID.TabStop = False
@@ -266,7 +264,7 @@ Partial Class D12F3050
         Me.tdbdObjectTypeID.RowHeight = 15
         Me.tdbdObjectTypeID.RowSubDividerColor = System.Drawing.Color.DarkGray
         Me.tdbdObjectTypeID.ScrollTips = False
-        Me.tdbdObjectTypeID.Size = New System.Drawing.Size(350, 147)
+        Me.tdbdObjectTypeID.Size = New System.Drawing.Size(400, 147)
         Me.tdbdObjectTypeID.Style = Style32
         Me.tdbdObjectTypeID.TabIndex = 11
         Me.tdbdObjectTypeID.TabStop = False

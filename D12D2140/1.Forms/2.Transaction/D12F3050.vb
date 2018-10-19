@@ -449,6 +449,7 @@ Public Class D12F3050
     End Sub
 
 #Region "tdbg"
+
     Private Sub tdbg_BeforeColUpdate(ByVal sender As Object, ByVal e As C1.Win.C1TrueDBGrid.BeforeColUpdateEventArgs) Handles tdbg.BeforeColUpdate
         '--- Kiểm tra giá trị hợp lệ
         Select Case e.ColIndex
@@ -555,6 +556,27 @@ Public Class D12F3050
         End Select
         '******************
         tdbg.UpdateData()
+    End Sub
+
+    '19/10/2018, id 114044-AICA - Lỗi khi tách số lượng đặt hàng trên màn hình Lựa chọn nhà cung cấp D12F3050
+    Private Sub InsertRowBelow(ByVal c1Grid As C1.Win.C1TrueDBGrid.C1TrueDBGrid, ByVal SplitIndex As Integer, ByVal ColFirst As Integer)
+        Dim iBookmark As Integer = 0
+        c1Grid.UpdateData()
+        If Not c1Grid.AllowAddNew Or c1Grid.RowCount < 1 Then Exit Sub
+
+        Try
+            iBookmark = c1Grid.Bookmark
+            Dim drAdd As DataRow
+            drAdd = dtGrid.NewRow
+            drAdd.ItemArray = dtGrid.Rows(iBookmark).ItemArray
+            dtGrid.Rows.InsertAt(drAdd, iBookmark + 1)
+            dtGrid.AcceptChanges()
+            c1Grid.UpdateData()
+            c1Grid.Row = iBookmark + 1
+            c1Grid.Focus()
+        Catch ex As Exception
+            D99C0008.Msg("Lỗi HotKeyShiftInsert: " & ex.Message)
+        End Try
     End Sub
 
     Private Sub tdbg_BeforeColEdit(ByVal sender As Object, ByVal e As C1.Win.C1TrueDBGrid.BeforeColEditEventArgs) Handles tdbg.BeforeColEdit
@@ -709,7 +731,7 @@ Public Class D12F3050
     End Sub
 
     Private Sub tdbg_RowColChange(ByVal sender As Object, ByVal e As C1.Win.C1TrueDBGrid.RowColChangeEventArgs) Handles tdbg.RowColChange
-  If e IsNot Nothing AndAlso e.LastRow = -1 Then Exit Sub
+        If e IsNot Nothing AndAlso e.LastRow = -1 Then Exit Sub
         If bShiftInsert Then
             If tdbg.AddNewMode = C1.Win.C1TrueDBGrid.AddNewModeEnum.AddNewCurrent Then
                 tdbg.Columns(COL_SupplierTransID).Text = "" ' Gán 1 c?t b?t k? ="" cho l??i

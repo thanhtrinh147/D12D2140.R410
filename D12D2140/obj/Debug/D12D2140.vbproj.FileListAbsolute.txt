@@ -87,3 +87,4 @@ d:\GitLemonCode\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140
 d:\GitLemonCode\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.dll.licenses
 d:\GitLemonCode\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.dll
 d:\GitLemonCode\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.pdb
+d:\GitLemonCode\LemonCode(4.10.00)\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.vbprojResolveAssemblyReference.cache
