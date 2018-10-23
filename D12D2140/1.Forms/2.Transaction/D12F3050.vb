@@ -528,6 +528,7 @@ Public Class D12F3050
                     InsertRowBelow(tdbg, SPLIT2, COL_OQuantity)
                     tdbg.Columns(COL_ObjectTypeID).Text = ""
                     tdbg.Columns(COL_ObjectID).Text = ""
+                    tdbg.Columns(COL_ObjectName).Text = "" '19/10/2018, id 114044-AICA - Lỗi khi tách số lượng đặt hàng trên màn hình Lựa chọn nhà cung cấp D12F3050
                     tdbg.Columns(COL_SupplierTransID).Text = ""
                     tdbg.Columns(COL_OQuantity).Text = SQLNumber(Number(tdbg(tdbg.Row - 1, COL_ApprovedQuantity)) - SumOQuantity, tdbg.Columns(COL_OQuantity).NumberFormat)
                     '***********************
