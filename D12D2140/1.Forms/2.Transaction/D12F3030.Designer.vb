@@ -45,6 +45,9 @@ Partial Class D12F3030
         Me.btnContinue = New System.Windows.Forms.Button()
         Me.FlowLayoutPanel2 = New System.Windows.Forms.FlowLayoutPanel()
         Me.btnF12 = New System.Windows.Forms.Button()
+        Me.C1SplitContainer1 = New C1.Win.C1SplitContainer.C1SplitContainer()
+        Me.C1SplitterPanel1 = New C1.Win.C1SplitContainer.C1SplitterPanel()
+        Me.C1SplitterPanel2 = New C1.Win.C1SplitContainer.C1SplitterPanel()
         mnuFindLink = New C1.Win.C1Command.C1CommandLink()
         mnuListAllLink = New C1.Win.C1Command.C1CommandLink()
         CType(Me.C1CommandHolder, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -53,6 +56,10 @@ Partial Class D12F3030
         CType(Me.tdbcPeriodFrom, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.tdbcPeriodTo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.FlowLayoutPanel2.SuspendLayout()
+        CType(Me.C1SplitContainer1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.C1SplitContainer1.SuspendLayout()
+        Me.C1SplitterPanel1.SuspendLayout()
+        Me.C1SplitterPanel2.SuspendLayout()
         Me.SuspendLayout()
         '
         'mnuFindLink
@@ -77,7 +84,8 @@ Partial Class D12F3030
         '
         'btnClose
         '
-        Me.btnClose.Location = New System.Drawing.Point(936, 628)
+        Me.btnClose.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnClose.Location = New System.Drawing.Point(937, 628)
         Me.btnClose.Name = "btnClose"
         Me.btnClose.Size = New System.Drawing.Size(76, 22)
         Me.btnClose.TabIndex = 15
@@ -87,7 +95,7 @@ Partial Class D12F3030
         'lblPeriod
         '
         Me.lblPeriod.AutoSize = True
-        Me.lblPeriod.Location = New System.Drawing.Point(12, 12)
+        Me.lblPeriod.Location = New System.Drawing.Point(6, 13)
         Me.lblPeriod.Name = "lblPeriod"
         Me.lblPeriod.Size = New System.Drawing.Size(19, 13)
         Me.lblPeriod.TabIndex = 0
@@ -129,7 +137,8 @@ Partial Class D12F3030
         '
         'btnFilter
         '
-        Me.btnFilter.Location = New System.Drawing.Point(936, 7)
+        Me.btnFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnFilter.Location = New System.Drawing.Point(937, 8)
         Me.btnFilter.Name = "btnFilter"
         Me.btnFilter.Size = New System.Drawing.Size(76, 22)
         Me.btnFilter.TabIndex = 7
@@ -138,7 +147,8 @@ Partial Class D12F3030
         '
         'btnChoose
         '
-        Me.btnChoose.Location = New System.Drawing.Point(847, 628)
+        Me.btnChoose.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnChoose.Location = New System.Drawing.Point(848, 628)
         Me.btnChoose.Name = "btnChoose"
         Me.btnChoose.Size = New System.Drawing.Size(83, 22)
         Me.btnChoose.TabIndex = 14
@@ -147,6 +157,7 @@ Partial Class D12F3030
         '
         'chkShowCheckedRow
         '
+        Me.chkShowCheckedRow.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.chkShowCheckedRow.AutoSize = True
         Me.chkShowCheckedRow.Location = New System.Drawing.Point(148, 631)
         Me.chkShowCheckedRow.Name = "chkShowCheckedRow"
@@ -177,6 +188,9 @@ Partial Class D12F3030
         Me.tdbgD.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbgD.AllowSort = False
         Me.tdbgD.AlternatingRows = True
+        Me.tdbgD.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.C1CommandHolder.SetC1ContextMenu(Me.tdbgD, Me.C1ContextMenu)
         Me.tdbgD.CaptionHeight = 17
         Me.tdbgD.ColumnFooters = True
@@ -186,7 +200,7 @@ Partial Class D12F3030
         Me.tdbgD.FlatStyle = C1.Win.C1TrueDBGrid.FlatModeEnum.Standard
         Me.tdbgD.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
         Me.tdbgD.Images.Add(CType(resources.GetObject("tdbgD.Images"), System.Drawing.Image))
-        Me.tdbgD.Location = New System.Drawing.Point(3, 297)
+        Me.tdbgD.Location = New System.Drawing.Point(2, 32)
         Me.tdbgD.MultiSelect = C1.Win.C1TrueDBGrid.MultiSelectEnum.None
         Me.tdbgD.Name = "tdbgD"
         Me.tdbgD.PreviewInfo.Location = New System.Drawing.Point(0, 0)
@@ -194,7 +208,7 @@ Partial Class D12F3030
         Me.tdbgD.PreviewInfo.ZoomFactor = 75.0R
         Me.tdbgD.PrintInfo.PageSettings = CType(resources.GetObject("tdbgD.PrintInfo.PageSettings"), System.Drawing.Printing.PageSettings)
         Me.tdbgD.RowHeight = 15
-        Me.tdbgD.Size = New System.Drawing.Size(1009, 324)
+        Me.tdbgD.Size = New System.Drawing.Size(1005, 310)
         Me.tdbgD.SplitDividerSize = New System.Drawing.Size(1, 1)
         Me.tdbgD.TabAcrossSplits = True
         Me.tdbgD.TabAction = C1.Win.C1TrueDBGrid.TabActionEnum.ColumnNavigation
@@ -210,6 +224,9 @@ Partial Class D12F3030
         Me.tdbgM.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbgM.AllowSort = False
         Me.tdbgM.AlternatingRows = True
+        Me.tdbgM.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.C1CommandHolder.SetC1ContextMenu(Me.tdbgM, Me.C1ContextMenu)
         Me.tdbgM.CaptionHeight = 17
         Me.tdbgM.ColumnFooters = True
@@ -219,7 +236,7 @@ Partial Class D12F3030
         Me.tdbgM.FlatStyle = C1.Win.C1TrueDBGrid.FlatModeEnum.Standard
         Me.tdbgM.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
         Me.tdbgM.Images.Add(CType(resources.GetObject("tdbgM.Images"), System.Drawing.Image))
-        Me.tdbgM.Location = New System.Drawing.Point(3, 37)
+        Me.tdbgM.Location = New System.Drawing.Point(2, 2)
         Me.tdbgM.MultiSelect = C1.Win.C1TrueDBGrid.MultiSelectEnum.None
         Me.tdbgM.Name = "tdbgM"
         Me.tdbgM.PreviewInfo.Location = New System.Drawing.Point(0, 0)
@@ -227,7 +244,7 @@ Partial Class D12F3030
         Me.tdbgM.PreviewInfo.ZoomFactor = 75.0R
         Me.tdbgM.PrintInfo.PageSettings = CType(resources.GetObject("tdbgM.PrintInfo.PageSettings"), System.Drawing.Printing.PageSettings)
         Me.tdbgM.RowHeight = 15
-        Me.tdbgM.Size = New System.Drawing.Size(1009, 228)
+        Me.tdbgM.Size = New System.Drawing.Size(1005, 228)
         Me.tdbgM.TabAcrossSplits = True
         Me.tdbgM.TabAction = C1.Win.C1TrueDBGrid.TabActionEnum.ColumnNavigation
         Me.tdbgM.TabIndex = 8
@@ -236,7 +253,8 @@ Partial Class D12F3030
         '
         'btnProduction
         '
-        Me.btnProduction.Location = New System.Drawing.Point(797, 270)
+        Me.btnProduction.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnProduction.Location = New System.Drawing.Point(781, 4)
         Me.btnProduction.Name = "btnProduction"
         Me.btnProduction.Size = New System.Drawing.Size(100, 22)
         Me.btnProduction.TabIndex = 9
@@ -245,9 +263,10 @@ Partial Class D12F3030
         '
         'btnSubInfo
         '
-        Me.btnSubInfo.Location = New System.Drawing.Point(902, 270)
+        Me.btnSubInfo.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnSubInfo.Location = New System.Drawing.Point(887, 4)
         Me.btnSubInfo.Name = "btnSubInfo"
-        Me.btnSubInfo.Size = New System.Drawing.Size(110, 22)
+        Me.btnSubInfo.Size = New System.Drawing.Size(120, 22)
         Me.btnSubInfo.TabIndex = 10
         Me.btnSubInfo.Text = "Thông tin phụ"
         Me.btnSubInfo.UseVisualStyleBackColor = True
@@ -278,7 +297,7 @@ Partial Class D12F3030
         Me.tdbcPeriodFrom.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
         Me.tdbcPeriodFrom.Images.Add(CType(resources.GetObject("tdbcPeriodFrom.Images"), System.Drawing.Image))
         Me.tdbcPeriodFrom.ItemHeight = 15
-        Me.tdbcPeriodFrom.Location = New System.Drawing.Point(53, 7)
+        Me.tdbcPeriodFrom.Location = New System.Drawing.Point(53, 8)
         Me.tdbcPeriodFrom.MatchEntryTimeout = CType(2000, Long)
         Me.tdbcPeriodFrom.MaxDropDownItems = CType(8, Short)
         Me.tdbcPeriodFrom.MaxLength = 32767
@@ -317,7 +336,7 @@ Partial Class D12F3030
         Me.tdbcPeriodTo.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!)
         Me.tdbcPeriodTo.Images.Add(CType(resources.GetObject("tdbcPeriodTo.Images"), System.Drawing.Image))
         Me.tdbcPeriodTo.ItemHeight = 15
-        Me.tdbcPeriodTo.Location = New System.Drawing.Point(198, 7)
+        Me.tdbcPeriodTo.Location = New System.Drawing.Point(198, 8)
         Me.tdbcPeriodTo.MatchEntryTimeout = CType(2000, Long)
         Me.tdbcPeriodTo.MaxDropDownItems = CType(8, Short)
         Me.tdbcPeriodTo.MaxLength = 32767
@@ -333,7 +352,7 @@ Partial Class D12F3030
         'lbl1
         '
         Me.lbl1.AutoSize = True
-        Me.lbl1.Location = New System.Drawing.Point(174, 7)
+        Me.lbl1.Location = New System.Drawing.Point(174, 13)
         Me.lbl1.Name = "lbl1"
         Me.lbl1.Size = New System.Drawing.Size(13, 13)
         Me.lbl1.TabIndex = 2
@@ -342,16 +361,18 @@ Partial Class D12F3030
         '
         'btnCompare
         '
-        Me.btnCompare.Location = New System.Drawing.Point(758, 628)
+        Me.btnCompare.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnCompare.Location = New System.Drawing.Point(747, 628)
         Me.btnCompare.Name = "btnCompare"
-        Me.btnCompare.Size = New System.Drawing.Size(83, 22)
+        Me.btnCompare.Size = New System.Drawing.Size(95, 22)
         Me.btnCompare.TabIndex = 13
         Me.btnCompare.Text = "So sánh NCC"
         Me.btnCompare.UseVisualStyleBackColor = True
         '
         'btnContinue
         '
-        Me.btnContinue.Location = New System.Drawing.Point(669, 628)
+        Me.btnContinue.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnContinue.Location = New System.Drawing.Point(658, 628)
         Me.btnContinue.Name = "btnContinue"
         Me.btnContinue.Size = New System.Drawing.Size(83, 22)
         Me.btnContinue.TabIndex = 12
@@ -363,19 +384,59 @@ Partial Class D12F3030
         Me.FlowLayoutPanel2.Controls.Add(Me.chkAutoSelectSupplier)
         Me.FlowLayoutPanel2.Controls.Add(Me.optSupplierAbsent)
         Me.FlowLayoutPanel2.Controls.Add(Me.optSupplierReady)
-        Me.FlowLayoutPanel2.Location = New System.Drawing.Point(315, 7)
+        Me.FlowLayoutPanel2.Location = New System.Drawing.Point(315, 9)
         Me.FlowLayoutPanel2.Name = "FlowLayoutPanel2"
         Me.FlowLayoutPanel2.Size = New System.Drawing.Size(615, 22)
         Me.FlowLayoutPanel2.TabIndex = 14
         '
         'btnF12
         '
-        Me.btnF12.Location = New System.Drawing.Point(3, 628)
+        Me.btnF12.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.btnF12.Location = New System.Drawing.Point(5, 628)
         Me.btnF12.Name = "btnF12"
         Me.btnF12.Size = New System.Drawing.Size(100, 22)
         Me.btnF12.TabIndex = 17
         Me.btnF12.Text = "Hiển thị (F12)"
         Me.btnF12.UseVisualStyleBackColor = True
+        '
+        'C1SplitContainer1
+        '
+        Me.C1SplitContainer1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.C1SplitContainer1.BackColor = System.Drawing.Color.FromArgb(CType(CType(240, Byte), Integer), CType(CType(240, Byte), Integer), CType(CType(240, Byte), Integer))
+        Me.C1SplitContainer1.CollapsingCueColor = System.Drawing.Color.FromArgb(CType(CType(133, Byte), Integer), CType(CType(133, Byte), Integer), CType(CType(150, Byte), Integer))
+        Me.C1SplitContainer1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.C1SplitContainer1.Location = New System.Drawing.Point(5, 40)
+        Me.C1SplitContainer1.Name = "C1SplitContainer1"
+        Me.C1SplitContainer1.Panels.Add(Me.C1SplitterPanel1)
+        Me.C1SplitContainer1.Panels.Add(Me.C1SplitterPanel2)
+        Me.C1SplitContainer1.Size = New System.Drawing.Size(1008, 582)
+        Me.C1SplitContainer1.SplitterWidth = 1
+        Me.C1SplitContainer1.TabIndex = 18
+        '
+        'C1SplitterPanel1
+        '
+        Me.C1SplitterPanel1.Collapsible = True
+        Me.C1SplitterPanel1.Controls.Add(Me.tdbgM)
+        Me.C1SplitterPanel1.Height = 238
+        Me.C1SplitterPanel1.Location = New System.Drawing.Point(0, 0)
+        Me.C1SplitterPanel1.Name = "C1SplitterPanel1"
+        Me.C1SplitterPanel1.Size = New System.Drawing.Size(1008, 231)
+        Me.C1SplitterPanel1.SizeRatio = 40.964R
+        Me.C1SplitterPanel1.TabIndex = 0
+        '
+        'C1SplitterPanel2
+        '
+        Me.C1SplitterPanel2.Collapsible = True
+        Me.C1SplitterPanel2.Controls.Add(Me.btnProduction)
+        Me.C1SplitterPanel2.Controls.Add(Me.btnSubInfo)
+        Me.C1SplitterPanel2.Controls.Add(Me.tdbgD)
+        Me.C1SplitterPanel2.Height = 100
+        Me.C1SplitterPanel2.Location = New System.Drawing.Point(0, 239)
+        Me.C1SplitterPanel2.Name = "C1SplitterPanel2"
+        Me.C1SplitterPanel2.Size = New System.Drawing.Size(1008, 343)
+        Me.C1SplitterPanel2.TabIndex = 1
         '
         'D12F3030
         '
@@ -391,13 +452,10 @@ Partial Class D12F3030
         Me.Controls.Add(Me.lbl1)
         Me.Controls.Add(Me.tdbcPeriodTo)
         Me.Controls.Add(Me.tdbcPeriodFrom)
-        Me.Controls.Add(Me.btnSubInfo)
-        Me.Controls.Add(Me.btnProduction)
-        Me.Controls.Add(Me.tdbgD)
         Me.Controls.Add(Me.chkShowCheckedRow)
         Me.Controls.Add(Me.btnFilter)
-        Me.Controls.Add(Me.tdbgM)
         Me.Controls.Add(Me.lblPeriod)
+        Me.Controls.Add(Me.C1SplitContainer1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.KeyPreview = True
@@ -414,6 +472,10 @@ Partial Class D12F3030
         CType(Me.tdbcPeriodTo, System.ComponentModel.ISupportInitialize).EndInit()
         Me.FlowLayoutPanel2.ResumeLayout(False)
         Me.FlowLayoutPanel2.PerformLayout()
+        CType(Me.C1SplitContainer1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.C1SplitContainer1.ResumeLayout(False)
+        Me.C1SplitterPanel1.ResumeLayout(False)
+        Me.C1SplitterPanel2.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -441,5 +503,8 @@ Partial Class D12F3030
     Private WithEvents btnContinue As System.Windows.Forms.Button
     Friend WithEvents FlowLayoutPanel2 As System.Windows.Forms.FlowLayoutPanel
     Private WithEvents btnF12 As System.Windows.Forms.Button
+    Friend WithEvents C1SplitContainer1 As C1.Win.C1SplitContainer.C1SplitContainer
+    Friend WithEvents C1SplitterPanel1 As C1.Win.C1SplitContainer.C1SplitterPanel
+    Friend WithEvents C1SplitterPanel2 As C1.Win.C1SplitContainer.C1SplitterPanel
 
 End Class

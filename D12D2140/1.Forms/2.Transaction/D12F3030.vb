@@ -217,6 +217,7 @@ Public Class D12F3030
     End Sub
 
     Private Sub D12F3030_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '24/10/2018, id 114069-Thay đổi độ rộng của lưới màn hình dưới lớn hơn lưới màn hình trên của màn hình Lựa chọn nhà cung cấp bước 1(D12F3030)
         LoadInfoGeneral()
         'Me.Cursor = Cursors.WaitCursor
         LoadtdbcPeriod()
@@ -1076,12 +1077,13 @@ Public Class D12F3030
         ' This call is required by the designer.
         InitializeComponent()
 
-        ' Add any initialization after the InitializeComponent() call.
-        AnchorForControl(EnumAnchorStyles.TopRight, btnFilter)
-        AnchorResizeColumnsGrid(EnumAnchorStyles.TopLeftRightBottom, tdbgM)
-        AnchorForControl(EnumAnchorStyles.BottomRight, btnSubInfo, btnProduction)
-        AnchorResizeColumnsGrid(EnumAnchorStyles.BottomLeftRight, tdbgD)
-        AnchorForControl(EnumAnchorStyles.BottomLeft, btnF12)
-        AnchorForControl(EnumAnchorStyles.BottomRight, btnClose, btnChoose, btnCompare, btnContinue)
+        '' Add any initialization after the InitializeComponent() call.
+        'AnchorForControl(EnumAnchorStyles.TopLeftRightBottom, C1SplitContainer1)
+        'AnchorForControl(EnumAnchorStyles.TopRight, btnFilter)
+        'AnchorResizeColumnsGrid(EnumAnchorStyles.TopLeftRightBottom, tdbgM)
+        'AnchorForControl(EnumAnchorStyles.BottomRight, btnSubInfo, btnProduction)
+        'AnchorResizeColumnsGrid(EnumAnchorStyles.BottomLeftRight, tdbgD)
+        'AnchorForControl(EnumAnchorStyles.BottomLeft, btnF12)
+        'AnchorForControl(EnumAnchorStyles.BottomRight, btnClose, btnChoose, btnCompare, btnContinue)
     End Sub
 End Class
