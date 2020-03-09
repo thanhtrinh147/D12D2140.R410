@@ -2133,13 +2133,13 @@ Public Class D12F3110
         Dim sSQL As New StringBuilder
         sSQL.Append("Insert Into D12T2050(")
         sSQL.Append("POID, DivisionID, TranMonth, TranYear, VoucherTypeID, " & vbCrLf)
-        sSQL.Append("VoucherNo, VoucherDate, ExpectDate, VoucherDesc, VoucherDescU, EmployeeID, " & vbCrLf)
+        sSQL.Append("VoucherNo, VoucherDate, ExpectDate, VoucherDescU, EmployeeID, " & vbCrLf)
         sSQL.Append("ObjectTypeID, ObjectID, ShipAddressID, CurrencyID, ExchangeRate, " & vbCrLf)
         sSQL.Append("Pick, PostedD06, IsLC, POStatus, CreateUserID, CreateDate, " & vbCrLf)
         sSQL.Append("LastModifyUserID, LastModifyDate, ValidDateFrom, ValidDateTo," & vbCrLf)
         sSQL.Append("PaymentDate, PaymentMethodID, ReceiptPersonID, " & vbCrLf)
         sSQL.Append("TypePostedD06, TransTypeID, DeliveryID, PaymentTermID, D06VoucherTypeID, D06VoucherNo, D06DocNo, D06DocDate, ")
-        sSQL.Append("Notes, NotesU, LCNo")
+        sSQL.Append("NotesU, LCNo")
         sSQL.Append(") " & vbCrLf & " Values(")
 
         sSQL.Append(SQLString(_pOID) & COMMA) 'POID [KEY], varchar[20], NOT NULL
@@ -2150,7 +2150,7 @@ Public Class D12F3110
         sSQL.Append(SQLString(txtVoucherNo.Text) & COMMA) 'VoucherNo, varchar[20], NOT NULL
         sSQL.Append(SQLDateSave(c1dateVoucherDate.Text) & COMMA) 'VoucherDate, datetime, NULL
         sSQL.Append(SQLDateSave(c1dateExpectDate.Text) & COMMA) 'ExpectDate, datetime, NULL
-        sSQL.Append(SQLStringUnicode(txtVoucherDesc.Text, gbUnicode, False) & COMMA) 'VoucherDesc, varchar[250], NOT NULL
+        'sSQL.Append(SQLStringUnicode(txtVoucherDesc.Text, gbUnicode, False) & COMMA) 'VoucherDesc, varchar[250], NOT NULL
         sSQL.Append(SQLStringUnicode(txtVoucherDesc.Text, gbUnicode, True) & COMMA) 'VoucherDesc, varchar[250], NOT NULL
         sSQL.Append(SQLString(tdbcEmployeeID.Text) & COMMA & vbCrLf) 'EmployeeID, varchar[20], NOT NULL
         sSQL.Append(SQLString(tdbcObjectTypeID.Text) & COMMA) 'ObjectTypeID, varchar[20], NOT NULL
@@ -2181,7 +2181,7 @@ Public Class D12F3110
         sSQL.Append(SQLString(txtD06DocNo.Text) & COMMA) 'D06DocNo, varchar[20], NOT NULL
         sSQL.Append(SQLDateSave(c1dateD06DocDate.Value) & COMMA) 'D06DocDate,datetime, NOT NULL
 
-        sSQL.Append(SQLStringUnicode(txtNote.Text, gbUnicode, False) & COMMA)
+        'sSQL.Append(SQLStringUnicode(txtNote.Text, gbUnicode, False) & COMMA)
         sSQL.Append(SQLStringUnicode(txtNote.Text, gbUnicode, True) & COMMA)
         sSQL.Append(SQLString(tdbcLCNo.Text))
         sSQL.Append(")")
@@ -2204,7 +2204,7 @@ Public Class D12F3110
         sSQL.Append("TranYear = " & SQLNumber(giTranYear) & COMMA) 'int, NOT NULL
         sSQL.Append("VoucherDate = " & SQLDateSave(c1dateVoucherDate.Text) & COMMA) 'datetime, NULL
         sSQL.Append("ExpectDate = " & SQLDateSave(c1dateExpectDate.Text) & COMMA & vbCrLf) 'datetime, NULL
-        sSQL.Append("VoucherDesc = " & SQLStringUnicode(txtVoucherDesc.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("VoucherDesc = " & SQLStringUnicode(txtVoucherDesc.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("VoucherDescU = " & SQLStringUnicode(txtVoucherDesc.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("EmployeeID = " & SQLString(tdbcEmployeeID.Text) & COMMA) 'varchar[20], NOT NULL
         sSQL.Append("ObjectTypeID = " & SQLString(tdbcObjectTypeID.Text) & COMMA) 'varchar[20], NOT NULL
@@ -2230,7 +2230,7 @@ Public Class D12F3110
         sSQL.Append("D06VoucherNo = " & SQLString(txtD06VoucherNo.Text) & COMMA) 'D06VoucherNo, varchar[20], NOT NULL
         sSQL.Append("D06DocNo = " & SQLString(txtD06DocNo.Text) & COMMA) 'D06VoucherNo, varchar[20], NOT NULL
         sSQL.Append("D06DocDate = " & SQLDateSave(c1dateD06DocDate.Text) & COMMA) 'datetime, NULL
-        sSQL.Append("Notes = " & SQLStringUnicode(txtNote.Text, gbUnicode, False) & COMMA)
+        'sSQL.Append("Notes = " & SQLStringUnicode(txtNote.Text, gbUnicode, False) & COMMA)
         sSQL.Append("NotesU = " & SQLStringUnicode(txtNote.Text, gbUnicode, True) & COMMA)
         sSQL.Append("LCNo = " & SQLString(tdbcLCNo.Text))
 
@@ -2288,16 +2288,16 @@ Public Class D12F3110
 
             sSQL.Append("Insert Into D12T2060(")
             sSQL.Append("POID, POItemID, PRID, PRTransactionID, SupplierTransID, " & vbCrLf)
-            sSQL.Append("OrderNum, InventoryID, InventoryName, InventoryNameU, UnitID, WareHouseID, DetailDesc, DetailDescU, " & vbCrLf)
+            sSQL.Append("OrderNum, InventoryID, InventoryNameU, UnitID, WareHouseID, DetailDescU, " & vbCrLf)
             sSQL.Append("OQuantity, CQuantity, UnitPrice, OAmount, CAmount, " & vbCrLf)
             sSQL.Append("Ana01ID, Ana02ID, Ana03ID, Ana04ID, Ana05ID, Ana06ID, Ana07ID, Ana08ID, Ana09ID, Ana10ID," & vbCrLf)
             sSQL.Append("MPSVoucherID, RateTax, VATGroupID, VATOAmount, VATCAmount, " & vbCrLf)
             sSQL.Append("NRef1, NRef2, NRef3, NRef4, NRef5," & vbCrLf)
-            sSQL.Append(" VRef1, VRef2, VRef3, VRef4, VRef5, VRef1U, VRef2U, VRef3U, VRef4U, VRef5U, " & vbCrLf)
+            sSQL.Append(" VRef1U, VRef2U, VRef3U, VRef4U, VRef5U, " & vbCrLf)
             sSQL.Append("DRef1,DRef2, DRef3, DRef4, DRef5," & vbCrLf)
             sSQL.Append("Spec01ID, Spec02ID, Spec03ID, Spec04ID, Spec05ID, Spec06ID, Spec07ID, Spec08ID, Spec09ID, Spec10ID, " & vbCrLf)
             sSQL.Append("ExpectDate, ExpiryDate, ProductID, LocationNo, PeriodID, D06OQuantity, D06CQuantity, ")
-            sSQL.Append("ProjectID, ProjectName, ProjectNameU, TaskID, TaskName, TaskNameU" & vbCrLf)
+            sSQL.Append("ProjectID, ProjectNameU, TaskID, TaskNameU" & vbCrLf)
             sSQL.Append(") Values(")
             sSQL.Append(SQLString(_pOID) & COMMA) 'POID, varchar[20], NOT NULL
             sSQL.Append(SQLString(tdbg(i, COL_POItemID)) & COMMA) 'POItemID [KEY], varchar[20], NOT NULL
@@ -2306,11 +2306,11 @@ Public Class D12F3110
             sSQL.Append(SQLString(tdbg(i, COL_SupplierTransID)) & COMMA & vbCrLf) 'SupplierTransID, varchar[20], NOT NULL
             sSQL.Append(SQLNumber(tdbg(i, COL_OrderNum)) & COMMA) 'OrderNum, int, NOT NULL
             sSQL.Append(SQLString(tdbg(i, COL_InventoryID)) & COMMA) 'InventoryID, varchar[20], NOT NULL
-            sSQL.Append(SQLStringUnicode(tdbg(i, COL_InventoryName), gbUnicode, False) & COMMA) 'InventoryName, varchar[100], NOT NULL
+            'sSQL.Append(SQLStringUnicode(tdbg(i, COL_InventoryName), gbUnicode, False) & COMMA) 'InventoryName, varchar[100], NOT NULL
             sSQL.Append(SQLStringUnicode(tdbg(i, COL_InventoryName), gbUnicode, True) & COMMA) 'InventoryName, varchar[100], NOT NULL
             sSQL.Append(SQLString(tdbg(i, COL_UnitID)) & COMMA) 'UnitID, varchar[20], NOT NULL
             sSQL.Append(SQLString(tdbg(i, COL_WarehouseID)) & COMMA) 'WareHouseID, varchar[20], NOT NULL
-            sSQL.Append(SQLStringUnicode(tdbg(i, COL_DetailDesc), gbUnicode, False) & COMMA & vbCrLf)
+            'sSQL.Append(SQLStringUnicode(tdbg(i, COL_DetailDesc), gbUnicode, False) & COMMA & vbCrLf)
             sSQL.Append(SQLStringUnicode(tdbg(i, COL_DetailDesc), gbUnicode, True) & COMMA & vbCrLf)
             sSQL.Append(SQLMoney(tdbg(i, COL_OQuantity), tdbg.Columns(COL_OQuantity).NumberFormat) & COMMA) 'OQuantity, decimal, NOT NULL
             sSQL.Append(SQLMoney(tdbg(i, COL_CQuantity), tdbg.Columns(COL_CQuantity).NumberFormat) & COMMA) 'CQuantity, decimal, NOT NULL
@@ -2337,11 +2337,11 @@ Public Class D12F3110
             sSQL.Append(SQLMoney(tdbg(i, COL_NRef4), DxxFormat.DefaultNumber2) & COMMA) 'NRef4, decimal, NOT NULL
             sSQL.Append(SQLMoney(tdbg(i, COL_NRef5), DxxFormat.DefaultNumber2) & COMMA & vbCrLf) 'NRef5, decimal, NOT NULL
 
-            sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef1), gbUnicode, False) & COMMA) 'VRef1, varchar[250], NOT NULL
-            sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef2), gbUnicode, False) & COMMA) 'VRef2, varchar[250], NOT NULL
-            sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef3), gbUnicode, False) & COMMA) 'VRef3, varchar[250], NOT NULL
-            sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef4), gbUnicode, False) & COMMA) 'VRef4, varchar[250], NOT NULL
-            sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef5), gbUnicode, False) & COMMA & vbCrLf) 'VRef5, varchar[250], NOT NULL
+            'sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef1), gbUnicode, False) & COMMA) 'VRef1, varchar[250], NOT NULL
+            'sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef2), gbUnicode, False) & COMMA) 'VRef2, varchar[250], NOT NULL
+            'sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef3), gbUnicode, False) & COMMA) 'VRef3, varchar[250], NOT NULL
+            'sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef4), gbUnicode, False) & COMMA) 'VRef4, varchar[250], NOT NULL
+            'sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef5), gbUnicode, False) & COMMA & vbCrLf) 'VRef5, varchar[250], NOT NULL
             sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef1), gbUnicode, True) & COMMA) 'VRef1, varchar[250], NOT NULL
             sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef2), gbUnicode, True) & COMMA) 'VRef2, varchar[250], NOT NULL
             sSQL.Append(SQLStringUnicode(tdbg(i, COL_VRef3), gbUnicode, True) & COMMA) 'VRef3, varchar[250], NOT NULL
@@ -2369,13 +2369,13 @@ Public Class D12F3110
             sSQL.Append(SQLMoney(tdbg(i, COL_D06CQuantity), tdbg.Columns(COL_D06CQuantity).NumberFormat) & COMMA) 'D06CQuantity, decimal, NOT NULL
             If L3Bool(ReturnValueC1Combo(tdbcTransTypeID, UseD54)) Then
                 sSQL.Append(SQLString(tdbg(i, COL_ProjectID)) & COMMA) 'ProjectID, varchar[20], NOT NULL
-                sSQL.Append(SQLStringUnicode(tdbg(i, COL_ProjectName), gbUnicode, False) & COMMA) 'ProjectName, varchar[20], NOT NULL
+                'sSQL.Append(SQLStringUnicode(tdbg(i, COL_ProjectName), gbUnicode, False) & COMMA) 'ProjectName, varchar[20], NOT NULL
                 sSQL.Append(SQLStringUnicode(tdbg(i, COL_ProjectName), gbUnicode, True) & COMMA) 'ProjectNameU, varchar[20], NOT NULL
                 sSQL.Append(SQLString(tdbg(i, COL_TaskID)) & COMMA) 'TaskID, varchar[20], NOT NULL
-                sSQL.Append(SQLStringUnicode(tdbg(i, COL_TaskName), gbUnicode, False) & COMMA) 'TaskName, varchar[20], NOT NULL
+                'sSQL.Append(SQLStringUnicode(tdbg(i, COL_TaskName), gbUnicode, False) & COMMA) 'TaskName, varchar[20], NOT NULL
                 sSQL.Append(SQLStringUnicode(tdbg(i, COL_TaskName), gbUnicode, True)) 'TaskNameU, varchar[20], NOT NULL
             Else
-                sSQL.Append("'','',N'','','',N''")
+                sSQL.Append("'',N'','',N''")
             End If
             sSQL.Append(")")
 

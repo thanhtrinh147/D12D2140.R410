@@ -211,16 +211,16 @@ End Sub
         sSQL.Append("Update D12T2050 Set ")
         sSQL.Append("LastModifyUserID = " & SQLString(gsUserID) & COMMA) 'varchar[20], NOT NULL
         sSQL.Append("LastModifyDate = GetDate()" & COMMA) 'datetime, NOT NULL
-        sSQL.Append("MStr01 = " & SQLStringUnicode(txtMStr01.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr02 = " & SQLStringUnicode(txtMStr02.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr03 = " & SQLStringUnicode(txtMStr03.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr04 = " & SQLStringUnicode(txtMStr04.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr05 = " & SQLStringUnicode(txtMStr05.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr06 = " & SQLStringUnicode(txtMStr06.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr07 = " & SQLStringUnicode(txtMStr07.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr08 = " & SQLStringUnicode(txtMStr08.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr09 = " & SQLStringUnicode(txtMStr09.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr10 = " & SQLStringUnicode(txtMStr10.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr01 = " & SQLStringUnicode(txtMStr01.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr02 = " & SQLStringUnicode(txtMStr02.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr03 = " & SQLStringUnicode(txtMStr03.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr04 = " & SQLStringUnicode(txtMStr04.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr05 = " & SQLStringUnicode(txtMStr05.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr06 = " & SQLStringUnicode(txtMStr06.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr07 = " & SQLStringUnicode(txtMStr07.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr08 = " & SQLStringUnicode(txtMStr08.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr09 = " & SQLStringUnicode(txtMStr09.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr10 = " & SQLStringUnicode(txtMStr10.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("MStr01U = " & SQLStringUnicode(txtMStr01.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("MStr02U = " & SQLStringUnicode(txtMStr02.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("MStr03U = " & SQLStringUnicode(txtMStr03.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL
@@ -268,16 +268,16 @@ End Sub
     Private Function SQLUpdateD06T2510() As StringBuilder
         Dim sSQL As New StringBuilder
         sSQL.Append("Update D06T2510 Set ")
-        sSQL.Append("MStr01 = " & SQLStringUnicode(txtMStr01.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr02 = " & SQLStringUnicode(txtMStr02.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr03 = " & SQLStringUnicode(txtMStr03.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr04 = " & SQLStringUnicode(txtMStr04.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr05 = " & SQLStringUnicode(txtMStr05.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr06 = " & SQLStringUnicode(txtMStr06.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr07 = " & SQLStringUnicode(txtMStr07.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr08 = " & SQLStringUnicode(txtMStr08.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr09 = " & SQLStringUnicode(txtMStr09.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr10 = " & SQLStringUnicode(txtMStr10.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr01 = " & SQLStringUnicode(txtMStr01.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr02 = " & SQLStringUnicode(txtMStr02.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr03 = " & SQLStringUnicode(txtMStr03.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr04 = " & SQLStringUnicode(txtMStr04.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr05 = " & SQLStringUnicode(txtMStr05.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr06 = " & SQLStringUnicode(txtMStr06.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr07 = " & SQLStringUnicode(txtMStr07.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr08 = " & SQLStringUnicode(txtMStr08.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr09 = " & SQLStringUnicode(txtMStr09.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr10 = " & SQLStringUnicode(txtMStr10.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("MStr01U = " & SQLStringUnicode(txtMStr01.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("MStr02U = " & SQLStringUnicode(txtMStr02.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("MStr03U = " & SQLStringUnicode(txtMStr03.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL
@@ -325,16 +325,16 @@ End Sub
     Private Function SQLUpdateD06T2410() As StringBuilder
         Dim sSQL As New StringBuilder
         sSQL.Append("Update D06T2410 Set ")
-        sSQL.Append("MStr01 = " & SQLStringUnicode(txtMStr01.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr02 = " & SQLStringUnicode(txtMStr02.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr03 = " & SQLStringUnicode(txtMStr03.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr04 = " & SQLStringUnicode(txtMStr04.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr05 = " & SQLStringUnicode(txtMStr05.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr06 = " & SQLStringUnicode(txtMStr06.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr07 = " & SQLStringUnicode(txtMStr07.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr08 = " & SQLStringUnicode(txtMStr08.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr09 = " & SQLStringUnicode(txtMStr09.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
-        sSQL.Append("MStr10 = " & SQLStringUnicode(txtMStr10.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr01 = " & SQLStringUnicode(txtMStr01.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr02 = " & SQLStringUnicode(txtMStr02.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr03 = " & SQLStringUnicode(txtMStr03.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr04 = " & SQLStringUnicode(txtMStr04.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr05 = " & SQLStringUnicode(txtMStr05.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr06 = " & SQLStringUnicode(txtMStr06.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr07 = " & SQLStringUnicode(txtMStr07.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr08 = " & SQLStringUnicode(txtMStr08.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr09 = " & SQLStringUnicode(txtMStr09.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
+        'sSQL.Append("MStr10 = " & SQLStringUnicode(txtMStr10.Text, gbUnicode, False) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("MStr01U = " & SQLStringUnicode(txtMStr01.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("MStr02U = " & SQLStringUnicode(txtMStr02.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL
         sSQL.Append("MStr03U = " & SQLStringUnicode(txtMStr03.Text, gbUnicode, True) & COMMA) 'varchar[250], NOT NULL

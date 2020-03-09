@@ -244,15 +244,15 @@ Public Class D12F3130
             End If
 
             sSQL.Append("Insert Into D12T3100(")
-            sSQL.Append("TransID, POItemID, ComponentID, ComponentName, ComponentNameU, Spec01ID, ")
+            sSQL.Append("TransID, POItemID, ComponentID, ComponentNameU, Spec01ID, ")
             sSQL.Append("Spec02ID, Spec03ID, Spec04ID, Spec05ID, Spec06ID, ")
             sSQL.Append("Spec07ID, Spec08ID, Spec09ID, Spec10ID, UnitID, ")
-            sSQL.Append("OQuantity, CQuantity, Description, DescriptionU")
+            sSQL.Append("OQuantity, CQuantity, DescriptionU")
             sSQL.Append(") Values(")
             sSQL.Append(SQLString(tdbg(i, COL_TransID)) & COMMA) 'TransID [KEY], varchar[20], NOT NULL
             sSQL.Append(SQLString(_POItemID) & COMMA) 'POItemID, varchar[20], NOT NULL
             sSQL.Append(SQLString(tdbg(i, COL_ComponentID)) & COMMA) 'ComponentID, varchar[20], NOT NULL
-            sSQL.Append(SQLStringUnicode(tdbg(i, COL_ComponentName), gbUnicode, False) & COMMA) 'ComponentName, varchar[500], NOT NULL
+            'sSQL.Append(SQLStringUnicode(tdbg(i, COL_ComponentName), gbUnicode, False) & COMMA) 'ComponentName, varchar[500], NOT NULL
             sSQL.Append(SQLStringUnicode(tdbg(i, COL_ComponentName), gbUnicode, True) & COMMA) 'ComponentNameU, varchar[500], NOT NULL
             sSQL.Append(SQLString(tdbg(i, COL_Spec01ID)) & COMMA) 'Spec01ID, varchar[20], NOT NULL
             sSQL.Append(SQLString(tdbg(i, COL_Spec02ID)) & COMMA) 'Spec02ID, varchar[20], NOT NULL
@@ -267,7 +267,7 @@ Public Class D12F3130
             sSQL.Append(SQLString(tdbg(i, COL_CUnitID)) & COMMA) 'UnitID, varchar[20], NOT NULL
             sSQL.Append(SQLMoney(tdbg(i, COL_COQuantity).ToString) & COMMA) 'OQuantity, decimal, NOT NULL
             sSQL.Append(SQLMoney(tdbg(i, COL_CCQuantity).ToString) & COMMA) 'CQuantity, decimal, NOT NULL
-            sSQL.Append(SQLStringUnicode(tdbg(i, COL_Description), gbUnicode, False) & COMMA) 'Description, decimal, NOT NULL
+            'sSQL.Append(SQLStringUnicode(tdbg(i, COL_Description), gbUnicode, False) & COMMA) 'Description, decimal, NOT NULL
             sSQL.Append(SQLStringUnicode(tdbg(i, COL_Description), gbUnicode, True)) 'Description, decimal, NOT NULL
             sSQL.Append(")")
 

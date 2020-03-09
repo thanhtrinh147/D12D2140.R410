@@ -361,7 +361,7 @@ Public Class D12F3101
         sSQL.Append("PRVoucherNo, VoucherDate, ExpectDate, PaymentDate, ShipAddressID, ")
         sSQL.Append("ReceiptPersonID, EmployeeID, POStatus, CreateUserID, CreateDate, LastModifyUserID, LastModifyDate, ")
         sSQL.Append("TransTypeID, PaymentMethodID, PaymentTermID, DeliveryID, IsLC, ")
-        sSQL.Append("ValidDateFrom, ValidDateTo, Pick, TypePostedD06, D06VoucherTypeID, VoucherDesc, VoucherDescU, Notes, NotesU, D06VoucherNo, PostedD06")
+        sSQL.Append("ValidDateFrom, ValidDateTo, Pick, TypePostedD06, D06VoucherTypeID, VoucherDescU, NotesU, D06VoucherNo, PostedD06")
         sSQL.Append(") Values(")
         sSQL.Append(SQLString(gsUserID) & COMMA) 'UserID, varchar[20], NOT NULL
         sSQL.Append(SQLString(gsDivisionID) & COMMA) 'DivisionID, varchar[20], NOT NULL
@@ -391,9 +391,9 @@ Public Class D12F3101
         sSQL.Append(SQLNumber(chkPick.Checked) & COMMA) 'Pick, tinyint, NOT NULL
         sSQL.Append(SQLNumber(IIf(optTypePostedD06_0.Checked, 0, 1)) & COMMA)
         sSQL.Append(SQLString(tdbcD06VoucherTypeID.Text) & COMMA) 'D06VoucherTypeID, varchar[20], NOT NULL
-        sSQL.Append(SQLStringUnicode(txtVoucherDesc.Text, gbUnicode, False) & COMMA)
+        'sSQL.Append(SQLStringUnicode(txtVoucherDesc.Text, gbUnicode, False) & COMMA)
         sSQL.Append(SQLStringUnicode(txtVoucherDesc.Text, gbUnicode, True) & COMMA)
-        sSQL.Append(SQLStringUnicode(txtNote.Text, gbUnicode, False) & COMMA)
+        'sSQL.Append(SQLStringUnicode(txtNote.Text, gbUnicode, False) & COMMA)
         sSQL.Append(SQLStringUnicode(txtNote.Text, gbUnicode, True) & COMMA)
         sSQL.Append(SQLString(txtD06VoucherNo.Text) & COMMA) 'D06VoucherNo, varchar[20], NOT NULL
         sSQL.Append(SQLNumber(chkPostedD06.Checked)) 'PostedD06, tinyint, NOT NULL
