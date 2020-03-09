@@ -13,10 +13,20 @@ Imports System.Text
 '#-------------------------------------------------------------------------------------
 Public Class D12F3030
 
-#Region "Const of tdbgM - Total of Columns: 6"
+'#Region "Const of tdbgM - Total of Columns: 6"
+'    Private Const COLM_Choose As String = "Choose"           ' Chọn
+'    Private Const COLM_PRVoucherNo As String = "PRVoucherNo" ' Số chứng từ
+'    Private Const COLM_PRDate As String = "PRDate"           ' Ngày yêu cầu
+'    Private Const COLM_BuyerName As String = "BuyerName"     ' Người yêu cầu
+'    Private Const COLM_Note As String = "Note"               ' Diễn giải
+'    Private Const COLM_PRID As String = "PRID"               ' PRID
+'#End Region
+    
+#Region "Const of tdbgM - Total of Columns: 7"
     Private Const COLM_Choose As String = "Choose"           ' Chọn
     Private Const COLM_PRVoucherNo As String = "PRVoucherNo" ' Số chứng từ
     Private Const COLM_PRDate As String = "PRDate"           ' Ngày yêu cầu
+    Private Const COLM_ApproveDate As String = "ApproveDate" ' Ngày duyệt yêu cầu '119954 - 27 June 2019
     Private Const COLM_BuyerName As String = "BuyerName"     ' Người yêu cầu
     Private Const COLM_Note As String = "Note"               ' Diễn giải
     Private Const COLM_PRID As String = "PRID"               ' PRID
@@ -161,6 +171,7 @@ Public Class D12F3030
         tdbgM.Columns("Choose").Caption = rl3("Chon") 'Chọn
         tdbgM.Columns("PRVoucherNo").Caption = rl3("So_chung_tu") 'Số chứng từ
         tdbgM.Columns("PRDate").Caption = rl3("Ngay_yeu_cau") 'Ngày yêu cầu
+        tdbgM.Columns("ApproveDate").Caption = rl3("Ngay_duyet_yeu_cau")'Ngày duyệt yêu cầu
         tdbgM.Columns("BuyerName").Caption = rl3("Nguoi_yeu_cau") 'Người yêu cầu
         tdbgM.Columns("Note").Caption = rl3("Dien_giai") 'Diễn giải
         '================================================================ 
