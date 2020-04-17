@@ -86,7 +86,6 @@ Partial Class D12F3050
         Me.tdbg.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbg.AllowSort = False
         Me.tdbg.AlternatingRows = True
-        Me.tdbg.CaptionHeight = 17
         Me.tdbg.Cursor = System.Windows.Forms.Cursors.Default
         Me.tdbg.EmptyRows = True
         Me.tdbg.ExtendRightColumn = True
@@ -102,7 +101,6 @@ Partial Class D12F3050
         Me.tdbg.PreviewInfo.Size = New System.Drawing.Size(0, 0)
         Me.tdbg.PreviewInfo.ZoomFactor = 75.0R
         Me.tdbg.PrintInfo.PageSettings = CType(resources.GetObject("tdbg.PrintInfo.PageSettings"), System.Drawing.Printing.PageSettings)
-        Me.tdbg.RowHeight = 15
         Me.tdbg.Size = New System.Drawing.Size(1007, 613)
         Me.tdbg.SplitDividerSize = New System.Drawing.Size(0, 0)
         Me.tdbg.TabAcrossSplits = True
@@ -118,7 +116,6 @@ Partial Class D12F3050
         Me.tdbdVATGroupID.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbdVATGroupID.AllowSort = False
         Me.tdbdVATGroupID.AlternatingRows = True
-        Me.tdbdVATGroupID.CaptionHeight = 17
         Me.tdbdVATGroupID.CaptionStyle = Style1
         Me.tdbdVATGroupID.ColumnCaptionHeight = 17
         Me.tdbdVATGroupID.ColumnFooterHeight = 17
@@ -138,7 +135,6 @@ Partial Class D12F3050
         Me.tdbdVATGroupID.RecordSelectorStyle = Style7
         Me.tdbdVATGroupID.RowDivider.Color = System.Drawing.Color.DarkGray
         Me.tdbdVATGroupID.RowDivider.Style = C1.Win.C1TrueDBGrid.LineStyleEnum.[Single]
-        Me.tdbdVATGroupID.RowHeight = 15
         Me.tdbdVATGroupID.RowSubDividerColor = System.Drawing.Color.DarkGray
         Me.tdbdVATGroupID.ScrollTips = False
         Me.tdbdVATGroupID.Size = New System.Drawing.Size(376, 147)
@@ -156,7 +152,6 @@ Partial Class D12F3050
         Me.tdbdCurrencyID.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbdCurrencyID.AllowSort = False
         Me.tdbdCurrencyID.AlternatingRows = True
-        Me.tdbdCurrencyID.CaptionHeight = 17
         Me.tdbdCurrencyID.CaptionStyle = Style9
         Me.tdbdCurrencyID.ColumnCaptionHeight = 17
         Me.tdbdCurrencyID.ColumnFooterHeight = 17
@@ -176,7 +171,6 @@ Partial Class D12F3050
         Me.tdbdCurrencyID.RecordSelectorStyle = Style15
         Me.tdbdCurrencyID.RowDivider.Color = System.Drawing.Color.DarkGray
         Me.tdbdCurrencyID.RowDivider.Style = C1.Win.C1TrueDBGrid.LineStyleEnum.[Single]
-        Me.tdbdCurrencyID.RowHeight = 15
         Me.tdbdCurrencyID.RowSubDividerColor = System.Drawing.Color.DarkGray
         Me.tdbdCurrencyID.ScrollTips = False
         Me.tdbdCurrencyID.Size = New System.Drawing.Size(401, 147)
@@ -194,7 +188,6 @@ Partial Class D12F3050
         Me.tdbdObjectID.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbdObjectID.AllowSort = False
         Me.tdbdObjectID.AlternatingRows = True
-        Me.tdbdObjectID.CaptionHeight = 17
         Me.tdbdObjectID.CaptionStyle = Style17
         Me.tdbdObjectID.ColumnCaptionHeight = 17
         Me.tdbdObjectID.ColumnFooterHeight = 17
@@ -214,7 +207,6 @@ Partial Class D12F3050
         Me.tdbdObjectID.RecordSelectorStyle = Style23
         Me.tdbdObjectID.RowDivider.Color = System.Drawing.Color.DarkGray
         Me.tdbdObjectID.RowDivider.Style = C1.Win.C1TrueDBGrid.LineStyleEnum.[Single]
-        Me.tdbdObjectID.RowHeight = 15
         Me.tdbdObjectID.RowSubDividerColor = System.Drawing.Color.DarkGray
         Me.tdbdObjectID.ScrollTips = False
         Me.tdbdObjectID.Size = New System.Drawing.Size(450, 147)
@@ -241,7 +233,6 @@ Partial Class D12F3050
         Me.tdbdObjectTypeID.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbdObjectTypeID.AllowSort = False
         Me.tdbdObjectTypeID.AlternatingRows = True
-        Me.tdbdObjectTypeID.CaptionHeight = 17
         Me.tdbdObjectTypeID.CaptionStyle = Style25
         Me.tdbdObjectTypeID.ColumnCaptionHeight = 17
         Me.tdbdObjectTypeID.ColumnFooterHeight = 17
@@ -261,7 +252,6 @@ Partial Class D12F3050
         Me.tdbdObjectTypeID.RecordSelectorStyle = Style31
         Me.tdbdObjectTypeID.RowDivider.Color = System.Drawing.Color.DarkGray
         Me.tdbdObjectTypeID.RowDivider.Style = C1.Win.C1TrueDBGrid.LineStyleEnum.[Single]
-        Me.tdbdObjectTypeID.RowHeight = 15
         Me.tdbdObjectTypeID.RowSubDividerColor = System.Drawing.Color.DarkGray
         Me.tdbdObjectTypeID.ScrollTips = False
         Me.tdbdObjectTypeID.Size = New System.Drawing.Size(400, 147)

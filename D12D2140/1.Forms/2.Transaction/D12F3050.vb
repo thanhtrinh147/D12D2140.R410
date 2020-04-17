@@ -25,7 +25,7 @@ Public Class D12F3050
         End Set
     End Property
 
-#Region "Const of tdbg - Total of Columns: 48"
+#Region "Const of tdbg - Total of Columns: 63"
     Private Const COL_OrderNum As Integer = 0               ' STT
     Private Const COL_PRTransactionID As Integer = 1        ' PRTransactionID
     Private Const COL_PRVoucherNo As Integer = 2            ' Số chứng từ
@@ -74,7 +74,23 @@ Public Class D12F3050
     Private Const COL_OriginalDecimal As Integer = 45       ' OriginalDecimal
     Private Const COL_ExchangeRateDecimal As Integer = 46   ' ExchangeRateDecimal
     Private Const COL_PurchasePriceDecimals As Integer = 47 ' PurchasePriceDecimals
+    Private Const COL_NRef1 As Integer = 48                 ' NRef1
+    Private Const COL_NRef2 As Integer = 49                 ' NRef2
+    Private Const COL_NRef3 As Integer = 50                 ' NRef3
+    Private Const COL_NRef4 As Integer = 51                 ' NRef4
+    Private Const COL_NRef5 As Integer = 52                 ' NRef5
+    Private Const COL_VRef1 As Integer = 53                 ' VRef1
+    Private Const COL_VRef2 As Integer = 54                 ' VRef2
+    Private Const COL_VRef3 As Integer = 55                 ' VRef3
+    Private Const COL_VRef4 As Integer = 56                 ' VRef4
+    Private Const COL_VRef5 As Integer = 57                 ' VRef5
+    Private Const COL_DRef1 As Integer = 58                 ' DRef1
+    Private Const COL_DRef2 As Integer = 59                 ' DRef2
+    Private Const COL_DRef3 As Integer = 60                 ' DRef3
+    Private Const COL_DRef4 As Integer = 61                 ' DRef4
+    Private Const COL_DRef5 As Integer = 62                 ' DRef5
 #End Region
+
 
 #Region "Properties"
 
@@ -184,6 +200,7 @@ Public Class D12F3050
         tdbg_NumberFormat()
         LoadTDBDropDown()
         VisibledCol()
+        LoadSubInfo()   'ID-136134
         '***********************
         'ID 83214 27/01/2016
         LoadTDBGrid()
@@ -1789,5 +1806,46 @@ Public Class D12F3050
     End Function
 #End Region
 
+#Region "ID-136134"
+    Dim dtNRef As DataTable
+    Dim dtVRef As DataTable
+    Dim dtDRef As DataTable
+    Private Sub LoadSubInfo()
+        Dim sSQL As String = "Select * From D07N0037('D07T0011')" & vbCrLf
+        sSQL &= " Order by DataType, DisplayOrder" & vbCrLf
+        Dim dtSub As DataTable = ReturnDataTable(sSQL)
 
+        dtNRef = ReturnTableFilter(dtSub, "FieldName Like 'N%'")
+        For i As Integer = 0 To dtNRef.Rows.Count - 1
+            With dtNRef.Rows(i)
+                tdbg.Splits(SPLIT2).DisplayColumns(COL_NRef1 + i).Width = 80
+                tdbg.Splits(SPLIT2).DisplayColumns(COL_NRef1 + i).HeadingStyle.Font = FontUnicode(gbUnicode)
+                tdbg.Splits(SPLIT2).DisplayColumns(COL_NRef1 + i).Visible = L3Bool(.Item("DefaultUse"))
+                tdbg.Columns(COL_NRef1 + i).Caption = IIf(geLanguage = EnumLanguage.Vietnamese, .Item("Caption84" & UnicodeJoin(gbUnicode)).ToString, .Item("Caption01" & UnicodeJoin(gbUnicode)).ToString).ToString
+                tdbg.Columns(COL_NRef1 + i).NumberFormat = "#,##0" & InsertZero(CInt(.Item("DecimalNum")))
+            End With
+        Next i
+        '************************
+        dtVRef = ReturnTableFilter(dtSub, "FieldName Like 'V%'")
+        For i As Integer = 0 To dtVRef.Rows.Count - 1
+            With dtVRef.Rows(i)
+                tdbg.Splits(SPLIT2).DisplayColumns(COL_VRef1 + i).Width = 140
+                tdbg.Splits(SPLIT2).DisplayColumns(COL_VRef1 + i).HeadingStyle.Font = FontUnicode(gbUnicode)
+                tdbg.Splits(SPLIT2).DisplayColumns(COL_VRef1 + i).Visible = L3Bool(.Item("DefaultUse"))
+                tdbg.Columns(COL_VRef1 + i).Caption = IIf(geLanguage = EnumLanguage.Vietnamese, .Item("Caption84" & UnicodeJoin(gbUnicode)).ToString, .Item("Caption01" & UnicodeJoin(gbUnicode)).ToString).ToString
+            End With
+        Next i
+        '************************
+        dtDRef = ReturnTableFilter(dtSub, "FieldName Like 'D%'")
+        For i As Integer = 0 To dtDRef.Rows.Count - 1
+            With dtDRef.Rows(i)
+                tdbg.Splits(SPLIT2).DisplayColumns(COL_DRef1 + i).Width = 80
+                tdbg.Splits(SPLIT2).DisplayColumns(COL_DRef1 + i).HeadingStyle.Font = FontUnicode(gbUnicode)
+                tdbg.Splits(SPLIT2).DisplayColumns(COL_DRef1 + i).Visible = L3Bool(.Item("DefaultUse"))
+                tdbg.Columns(COL_DRef1 + i).Caption = IIf(geLanguage = EnumLanguage.Vietnamese, .Item("Caption84" & UnicodeJoin(gbUnicode)).ToString, .Item("Caption01" & UnicodeJoin(gbUnicode)).ToString).ToString
+            End With
+        Next i      
+
+    End Sub
+#End Region
 End Class

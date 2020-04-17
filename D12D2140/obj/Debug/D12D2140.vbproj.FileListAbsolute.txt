@@ -112,3 +112,27 @@ d:\GitCode\LEMONCODE (4.10.00)\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.vbp
 d:\GitCode\LEMONCODE (4.10.00)\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.dll.licenses
 d:\GitCode\LEMONCODE (4.10.00)\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.dll
 d:\GitCode\LEMONCODE (4.10.00)\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.pdb
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.vbprojResolveAssemblyReference.cache
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.vbproj.ResolveComReference.cache
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3030.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3031.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3032.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3040.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3050.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3056.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3070.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3100.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3101.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3110.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3130.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F2030.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3111.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3120.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F7777.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D12F3112.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.D99F2222.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.Resources.resources
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.vbproj.GenerateResource.Cache
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.dll.licenses
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.dll
+C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Debug\D12D2140.pdb
