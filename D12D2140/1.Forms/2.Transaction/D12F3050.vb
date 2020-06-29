@@ -1049,7 +1049,7 @@ Public Class D12F3050
 
         End Try
     End Sub
-
+    Dim bFirstHeadClick As Boolean = True
     Private Sub CopyColumns_ObjectID(ByVal c1Grid As C1.Win.C1TrueDBGrid.C1TrueDBGrid, ByVal ColCopy As Integer, ByVal RowCopy As Int32)
         Dim sValue As String = c1Grid(RowCopy, ColCopy).ToString
         Dim sValueName As String = c1Grid(RowCopy, ColCopy + 1).ToString
@@ -1059,7 +1059,7 @@ Public Class D12F3050
             If c1Grid.RowCount < 2 Then Exit Sub
 
             sValue = c1Grid(RowCopy, ColCopy).ToString
-
+            bFirstHeadClick = True 'ID-141753
             Dim Flag As DialogResult
             Flag = MessageBox.Show(rL3("Copy_cot_du_lieu_cho") & vbCrLf & rL3("____-_Tat_ca_cac_cot_(nhan_Yes)") & vbCrLf & rL3("____-_Nhung_dong_con_trong_(nhan_No)"), MsgAnnouncement, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1)
 
@@ -1100,7 +1100,7 @@ Public Class D12F3050
         End Try
 
     End Sub
-
+    Dim _bChangeUnitPriceHeadClick = False
     Private Sub DefaultSomeCol(ByVal drRow As DataRow, Optional ByVal i As Integer = -1, Optional ByVal sNewCurrency As String = "", Optional ByVal sExchangeRate As String = "")
         Dim dt As DataTable
         With drRow
@@ -1147,6 +1147,16 @@ Public Class D12F3050
                 CalOAmount()
                 CalVATOAmount()
             Else
+                If bFirstHeadClick = True Then 'ID-141752
+                    If L3Int(tdbg.Columns(COL_UnitPrice).Text) <> 0 Then
+                        If D99C0008.MsgAsk(rL3("Ban_co_muon_thay_doi_don_gia_theo_doi_tuong_da_chon_khong")) = Windows.Forms.DialogResult.Yes Then '119803 - 03 june 2019  
+                            _bChangeUnitPriceHeadClick = True
+                        Else
+                            _bChangeUnitPriceHeadClick = False
+                        End If
+                        bFirstHeadClick = False
+                    End If
+                End If
                 tdbg(i, COL_CurrencyID) = IIf(.Item("CurrencyID").ToString = "", sNewCurrency, .Item("CurrencyID").ToString)
                 '*18/4/2013 theo ID 55529
                 tdbg(i, COL_OriginalDecimal) = .Item("OriginalDecimal").ToString
@@ -1163,8 +1173,10 @@ Public Class D12F3050
                         If dr1.Length > 0 Then tdbg(i, COL_ExchangeRate) = Number(dr1(0).Item("ExchangeRate").ToString, tdbg.Columns(COL_ExchangeRate).NumberFormat)
                     End If
                 End If
-
-                tdbg(i, COL_UnitPrice) = Number(.Item("UnitPRice"), "N" & tdbg(i, COL_PurchasePriceDecimals).ToString)
+                If _bChangeUnitPriceHeadClick = True Then 'ID-141752
+                    tdbg(i, COL_UnitPrice) = Number(.Item("UnitPRice"), "N" & tdbg(i, COL_PurchasePriceDecimals).ToString)
+                End If
+                'tdbg(i, COL_UnitPrice) = Number(.Item("UnitPRice"), "N" & tdbg(i, COL_PurchasePriceDecimals).ToString)
                 tdbg(i, COL_MinQuantity) = Number(.Item("MinQuantity"), tdbg.Columns(COL_MinQuantity).NumberFormat)
 
                 '6/11/2017, id 104646-QV - Lỗi tính năng headclick
@@ -1180,10 +1192,12 @@ Public Class D12F3050
                 End If
 
                 dt = ReturnDataTable(SQLStoreD12P3052(i))
-                If dt.Rows.Count > 0 Then
-                    tdbg(i, COL_UnitPrice) = Number(dt.Rows(0)("UnitPrice"), "N" & tdbg(i, COL_PurchasePriceDecimals).ToString)
-                Else
-                    tdbg(i, COL_UnitPrice) = Number(0, "N" & tdbg(i, COL_PurchasePriceDecimals).ToString)
+                If _bChangeUnitPriceHeadClick = True Then 'ID-141752
+                    If dt.Rows.Count > 0 Then
+                        tdbg(i, COL_UnitPrice) = Number(dt.Rows(0)("UnitPrice"), "N" & tdbg(i, COL_PurchasePriceDecimals).ToString)
+                    Else
+                        tdbg(i, COL_UnitPrice) = Number(0, "N" & tdbg(i, COL_PurchasePriceDecimals).ToString)
+                    End If
                 End If
 
                 tdbg(i, COL_SupplyUnitID) = .Item("SupplyUnitID").ToString
@@ -1194,7 +1208,7 @@ Public Class D12F3050
                 CalSupplyCQuantity(i)
                 CalOAmount(i)
                 CalVATOAmount(i)
-            End If
+                End If
         End With
     End Sub
 
