@@ -204,6 +204,7 @@ Public Class D12F3050
         '***********************
         'ID 83214 27/01/2016
         LoadTDBGrid()
+        'LoadDefault_COL_UnitPrice()
         Loaddt1Row()
         If _baseOnPrice = 0 And _baseONPriority = 0 And _baseDeliveryDay = 0 Then
             LoadTable_ObjectTypeID()
@@ -1155,6 +1156,9 @@ Public Class D12F3050
                             _bChangeUnitPriceHeadClick = False
                         End If
                         bFirstHeadClick = False
+                    Else
+                        _bChangeUnitPriceHeadClick = True
+                        bFirstHeadClick = False
                     End If
                 End If
                 tdbg(i, COL_CurrencyID) = IIf(.Item("CurrencyID").ToString = "", sNewCurrency, .Item("CurrencyID").ToString)
@@ -1862,4 +1866,50 @@ Public Class D12F3050
 
     End Sub
 #End Region
+
+    'Private Sub LoadDefault_COL_UnitPrice()
+    '    tdbg.UpdateData()
+    '    For i As Integer = 0 To tdbg.RowCount - 1
+
+    '        tdbg.Row = i
+    '        Dim dt As DataTable = ReturnDataTable(SQLStoreD12P3052)
+    '        If dt.Rows.Count > 0 Then
+    '            tdbg.Columns(COL_UnitPrice).Text = SQLNumber(dt.Rows(0)("UnitPrice").ToString, "N" & tdbg.Columns(COL_PurchasePriceDecimals).Text)
+    '        Else
+    '            tdbg.Columns(COL_UnitPrice).Text = SQLNumber(0, "N" & tdbg.Columns(COL_PurchasePriceDecimals).Text)
+    '        End If
+
+    '        CalCQuantity()
+    '        CalSupplyOQuantity()
+    '        CalSupplyCQuantity()
+    '        CalOAmount()
+    '        CalVATOAmount()
+    '        '*******************************
+    '        'SumOQuantity lấy từ BeforeColUpdate
+    '        'Đẩy dữ liệu mới tính xuống dưới 1 dòng
+    '        If Number(SumOQuantity, tdbg.Columns(COL_OQuantity).NumberFormat) < Number(tdbg.Columns(COL_ApprovedQuantity).Text, tdbg.Columns(COL_ApprovedQuantity).NumberFormat) Then
+    '            bShiftInsert = True
+    '            tdbg.AllowAddNew = True 'ID 95381 23/02/2017
+    '            InsertRowBelow(tdbg, SPLIT2, COL_OQuantity)
+    '            tdbg.Columns(COL_ObjectTypeID).Text = ""
+    '            tdbg.Columns(COL_ObjectID).Text = ""
+    '            tdbg.Columns(COL_ObjectName).Text = "" '19/10/2018, id 114044-AICA - Lỗi khi tách số lượng đặt hàng trên màn hình Lựa chọn nhà cung cấp D12F3050
+    '            tdbg.Columns(COL_SupplierTransID).Text = ""
+    '            tdbg.Columns(COL_OQuantity).Text = SQLNumber(Number(tdbg(tdbg.Row - 1, COL_ApprovedQuantity)) - SumOQuantity, tdbg.Columns(COL_OQuantity).NumberFormat)
+    '            '***********************
+    '            'Tính lại cho dòng mới tách
+    '            CalCQuantity()
+    '            CalSupplyOQuantity()
+    '            CalSupplyCQuantity()
+    '            CalOAmount()
+    '            CalVATOAmount()
+    '            '************************
+    '            tdbg.SplitIndex = SPLIT2
+    '            tdbg.Row = tdbg.Row
+    '            tdbg.Col = COL_OQuantity
+    '            tdbg.Focus()
+    '            tdbg.AllowAddNew = False 'ID 95381 23/02/2017
+    '        End If
+    '    Next
+    'End Sub
 End Class
