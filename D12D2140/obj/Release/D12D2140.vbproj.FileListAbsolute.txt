@@ -167,4 +167,3 @@ C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.
 C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.vbproj.GenerateResource.Cache
 C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.dll.licenses
 C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.dll
-C:\Users\admin\Desktop\DGN_R410\D12\D12D2140.R410\D12D2140\obj\Release\D12D2140.vbprojResolveAssemblyReference.cache

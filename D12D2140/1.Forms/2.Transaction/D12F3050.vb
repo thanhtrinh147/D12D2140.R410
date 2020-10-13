@@ -1912,4 +1912,13 @@ Public Class D12F3050
     '        End If
     '    Next
     'End Sub
+
+    'ID-144625
+    Private Sub D12F3050_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        If Not _bSaved Then
+            If Not AskMsgBeforeClose() Then
+                e.Cancel = True
+            End If
+        End If
+    End Sub
 End Class
