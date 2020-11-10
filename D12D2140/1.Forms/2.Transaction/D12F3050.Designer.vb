@@ -86,6 +86,7 @@ Partial Class D12F3050
         Me.tdbg.AllowRowSizing = C1.Win.C1TrueDBGrid.RowSizingEnum.None
         Me.tdbg.AllowSort = False
         Me.tdbg.AlternatingRows = True
+        Me.tdbg.ColumnFooters = True
         Me.tdbg.Cursor = System.Windows.Forms.Cursors.Default
         Me.tdbg.EmptyRows = True
         Me.tdbg.ExtendRightColumn = True

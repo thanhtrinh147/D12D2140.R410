@@ -204,6 +204,7 @@ Public Class D12F3050
         '***********************
         'ID 83214 27/01/2016
         LoadTDBGrid()
+        ResetColorGrid(tdbg, 0, tdbg.Splits.Count - 1)
         'LoadDefault_COL_UnitPrice()
         Loaddt1Row()
         If _baseOnPrice = 0 And _baseONPriority = 0 And _baseDeliveryDay = 0 Then
@@ -370,6 +371,7 @@ Public Class D12F3050
         Dim sSQL As String = IIf(_sQLLoadData = "", SQLStoreD12P2035(), _sQLLoadData).ToString
         dtGrid = ReturnDataTable(sSQL)
         LoadDataSource(tdbg, dtGrid, gbUnicode)
+        ResetGrid() 'ID-144738
     End Sub
 
     Private Sub ReLoadTDBGrid()
@@ -575,6 +577,7 @@ Public Class D12F3050
         End Select
         '******************
         tdbg.UpdateData()
+        ResetGrid() 'ID-144738
     End Sub
 
     '19/10/2018, id 114044-AICA - Lỗi khi tách số lượng đặt hàng trên màn hình Lựa chọn nhà cung cấp D12F3050
@@ -1921,4 +1924,9 @@ Public Class D12F3050
             End If
         End If
     End Sub
+
+    Private Sub ResetGrid()
+        FooterSumNew(tdbg, COL_OQuantity, COL_CQuantity, COL_UnitPrice, COL_OAmount, COL_VATOAmount)
+    End Sub
+
 End Class
