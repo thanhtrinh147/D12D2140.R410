@@ -483,16 +483,20 @@ Public Class D12F3050
                     tdbg.Columns(e.ColIndex).Text = ""
                 End If
             Case COL_OQuantity
-                SumOQuantity = Number(tdbg.Columns(COL_OQuantity).Text)
-                For i As Integer = 0 To tdbg.RowCount - 1
-                    If i <> tdbg.Row And tdbg(i, COL_PRTransactionID).ToString = tdbg.Columns(COL_PRTransactionID).Text Then
-                        SumOQuantity += Number(SQLNumber(tdbg(i, COL_OQuantity), tdbg.Columns(COL_OQuantity).NumberFormat))
+                Try
+                    SumOQuantity = Number(tdbg.Columns(COL_OQuantity).Text)
+                    For i As Integer = 0 To tdbg.RowCount - 1
+                        If i <> tdbg.Row And tdbg(i, COL_PRTransactionID).ToString = tdbg.Columns(COL_PRTransactionID).Text Then
+                            SumOQuantity += Number(SQLNumber(tdbg(i, COL_OQuantity), tdbg.Columns(COL_OQuantity).NumberFormat))
+                        End If
+                    Next i
+                    If SumOQuantity > Number(tdbg.Columns(COL_POQuantity).Text) Then
+                        D99C0008.MsgL3(rL3("So_luong_dat_hang_khong_duoc_phep_lon_hon_so_luong_duoc_phep_lap_DDH"))
+                        e.Cancel = True
                     End If
-                Next i
-                If SumOQuantity > Number(tdbg.Columns(COL_POQuantity).Text) Then
-                    D99C0008.MsgL3(rL3("So_luong_dat_hang_khong_duoc_phep_lon_hon_so_luong_duoc_phep_lap_DDH"))
+                Catch ex As Exception
                     e.Cancel = True
-                End If
+                End Try
         End Select
     End Sub
 
@@ -733,6 +737,10 @@ Public Class D12F3050
             Case Else
                 If e.Control And e.KeyCode = Keys.Delete Then
                     If Number(tdbg.Columns(COL_IsUsed).Text) = 1 Then Exit Sub
+                End If
+                If e.Control And e.KeyCode = Keys.V Then
+                    tdbg.Columns(tdbg.Col).Text = Clipboard.GetText
+                    tdbg.UpdateData()
                 End If
                 HotKeyDownGrid(e, tdbg, COL_ObjectTypeID, 0, 0, True, True, True)
         End Select
