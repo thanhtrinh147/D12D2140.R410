@@ -739,6 +739,7 @@ Public Class D12F3050
                     If Number(tdbg.Columns(COL_IsUsed).Text) = 1 Then Exit Sub
                 End If
                 If e.Control And e.KeyCode = Keys.V Then
+                    If tdbg.FilterActive Then Exit Select
                     tdbg.Columns(tdbg.Col).Text = Clipboard.GetText
                     tdbg.UpdateData()
                 End If
