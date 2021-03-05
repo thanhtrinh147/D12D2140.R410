@@ -244,7 +244,7 @@ Partial Class D12F3030
         Me.tdbgM.TabAcrossSplits = true
         Me.tdbgM.TabAction = C1.Win.C1TrueDBGrid.TabActionEnum.ColumnNavigation
         Me.tdbgM.TabIndex = 8
-        Me.tdbgM.Tag = "sCOLM"
+        Me.tdbgM.Tag = "COLM"
         Me.tdbgM.PropBag = resources.GetString("tdbgM.PropBag")
         '
         'btnProduction
