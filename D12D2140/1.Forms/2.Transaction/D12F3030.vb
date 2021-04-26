@@ -14,16 +14,28 @@ Imports System.Text
 Public Class D12F3030
 
     
+    '#Region "Const of tdbgM - Total of Columns: 8"
+    '    Private Const COLM_Choose As Integer = 0      ' Chọn
+    '    Private Const COLM_PRVoucherNo As Integer = 1 ' Số chứng từ
+    '    Private Const COLM_PRDate As Integer = 2      ' Ngày yêu cầu
+    '    Private Const COLM_ApproveDate As Integer = 3 ' Ngày duyệt yêu cầu
+    '    Private Const COLM_BuyerName As Integer = 4   ' Người yêu cầu
+    '    Private Const COLM_Note As Integer = 5        ' Diễn giải
+    '    Private Const COLM_PRID As Integer = 6        ' PRID
+    '    Private Const COLM_PRNote As Integer = 7      ' Ghi chú
+    '#End Region
+
 #Region "Const of tdbgM - Total of Columns: 8"
-    Private Const COLM_Choose As Integer = 0      ' Chọn
-    Private Const COLM_PRVoucherNo As Integer = 1 ' Số chứng từ
-    Private Const COLM_PRDate As Integer = 2      ' Ngày yêu cầu
-    Private Const COLM_ApproveDate As Integer = 3 ' Ngày duyệt yêu cầu
-    Private Const COLM_BuyerName As Integer = 4   ' Người yêu cầu
-    Private Const COLM_Note As Integer = 5        ' Diễn giải
-    Private Const COLM_PRID As Integer = 6        ' PRID
-    Private Const COLM_PRNote As Integer = 7      ' Ghi chú
+    Private Const COLM_Choose As String = "Choose"           ' Chọn
+    Private Const COLM_PRVoucherNo As String = "PRVoucherNo" ' Số chứng từ
+    Private Const COLM_PRDate As String = "PRDate"           ' Ngày yêu cầu
+    Private Const COLM_ApproveDate As String = "ApproveDate" ' Ngày duyệt yêu cầu
+    Private Const COLM_BuyerName As String = "BuyerName"     ' Người yêu cầu
+    Private Const COLM_Note As String = "Note"               ' Diễn giải
+    Private Const COLM_PRID As String = "PRID"               ' PRID
+    Private Const COLM_PRNote As String = "PRNote"           ' Ghi chú
 #End Region
+
 
 
 #Region "Const of tdbgD - Total of Columns: 65"

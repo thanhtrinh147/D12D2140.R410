@@ -1123,10 +1123,10 @@ Public Class D12F3050
                 '*18/4/2013 theo ID 55529
                 tdbg.Columns(COL_OriginalDecimal).Text = .Item("OriginalDecimal").ToString
                 tdbg.Columns(COL_PurchasePriceDecimals).Text = .Item("PurchasePriceDecimals").ToString
-                If L3Int(tdbg .Columns (COL_UnitPrice).Text) <> 0 
+                If L3Int(tdbg.Columns(COL_UnitPrice).Text) <> 0 Then
                     If D99C0008.MsgAsk(rL3("Ban_co_muon_thay_doi_don_gia_theo_doi_tuong_da_chon_khong")) = Windows.Forms.DialogResult.Yes Then '119803 - 03 june 2019
                         tdbg.Columns(COL_UnitPrice).Text = SQLNumber(.Item("UnitPRice"), "N" & tdbg.Columns(COL_PurchasePriceDecimals).Text)
-                         tdbg.Columns(COL_UnitPrice).Tag = True
+                        tdbg.Columns(COL_UnitPrice).Tag = True
                     End If
                 End If
                 tdbg.Columns(COL_MinQuantity).Text = SQLNumber(.Item("MinQuantity"), tdbg.Columns(COL_MinQuantity).NumberFormat)
@@ -1140,16 +1140,17 @@ Public Class D12F3050
                     End If
                 End If
 
-                If tdbg.Columns(COL_UnitPrice).Tag IsNot Nothing andalso L3Bool (tdbg.Columns(COL_UnitPrice).Tag) = True  Then
-                    dt = ReturnDataTable(SQLStoreD12P3052)
+                ' If tdbg.Columns(COL_UnitPrice).Tag IsNot Nothing AndAlso L3Bool(tdbg.Columns(COL_UnitPrice).Tag) = True Then
+                'If tdbg.Columns(COL_UnitPrice).Tag Is Nothing OrElse L3Bool(tdbg.Columns(COL_UnitPrice).Tag) = True Then   'ID-157749  cai này mới
+                dt = ReturnDataTable(SQLStoreD12P3052)
 
-                    If dt.Rows.Count > 0 Then
-                        tdbg.Columns(COL_UnitPrice).Text = SQLNumber(dt.Rows(0)("UnitPrice").ToString, "N" & tdbg.Columns(COL_PurchasePriceDecimals).Text)
-                    Else
-                        tdbg.Columns(COL_UnitPrice).Text = SQLNumber(0, "N" & tdbg.Columns(COL_PurchasePriceDecimals).Text)
-                    End If
+                If dt.Rows.Count > 0 Then
+                    tdbg.Columns(COL_UnitPrice).Text = SQLNumber(dt.Rows(0)("UnitPrice").ToString, "N" & tdbg.Columns(COL_PurchasePriceDecimals).Text)
+                Else
+                    tdbg.Columns(COL_UnitPrice).Text = SQLNumber(0, "N" & tdbg.Columns(COL_PurchasePriceDecimals).Text)
                 End If
-              tdbg.Columns(COL_UnitPrice).Tag = False 
+                'End If
+                tdbg.Columns(COL_UnitPrice).Tag = False
 
                 tdbg.Columns(COL_SupplyUnitID).Text = .Item("SupplyUnitID").ToString
                 tdbg.Columns(COL_ConversionFactor).Text = .Item("ConversionFactor").ToString
@@ -1224,7 +1225,7 @@ Public Class D12F3050
                 CalSupplyCQuantity(i)
                 CalOAmount(i)
                 CalVATOAmount(i)
-                End If
+            End If
         End With
     End Sub
 
